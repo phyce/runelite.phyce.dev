@@ -7,11 +7,9 @@ export default component$(() => {
 
   return (
     <footer>
-      <div class="container">
-        <a href="https://www.builder.io/" target="_blank" class={styles.anchor}>
-          <span>Made with ♡ by Builder.io</span>
-          <span class={styles.spacer}>|</span>
-          <span>{serverTime.value.date}</span>
+      <div class="py-2">
+        <a href="https://phyce.dev/" target="_blank" class={styles.anchor}>
+          <span>Made by <text class="text-orange-500">Phyce</text></span>
         </a>
       </div>
     </footer>

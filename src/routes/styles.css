@@ -110,12 +110,11 @@ ul {
     padding: 60px 80px;
   }
   .container.container-spacing-xl {
-    padding: 100px 60px;
+
   }
   .container.container-flex {
     display: flex;
     justify-content: center;
-    gap: 60px;
   }
 }
 
