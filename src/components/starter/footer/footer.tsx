@@ -6,8 +6,8 @@ export default component$(() => {
   const serverTime = useServerTimeLoader();
 
   return (
-    <footer>
-      <div class="py-2">
+    <footer class="py-2">
+      <div >
         <a href="https://phyce.dev/" target="_blank" class={styles.anchor}>
           <span>Made by <text class="text-orange-500">Phyce</text></span>
         </a>
