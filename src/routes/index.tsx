@@ -5,7 +5,7 @@ import { formatDate, truncateString } from '~/utils/utils';
 
 export default component$(() => {
     const pluginsResource = useResource$<Plugin[]>(async ({ track, cleanup }) => {
-        const response = await fetch('http://api.runelite.phyce.dev/plugins'); // Adjust the URL/port as necessary
+        const response = await fetch('http://osrs-stats:8080/plugins');
         const jsonResponse = await response.json();
         if (jsonResponse.success) return jsonResponse.data;
         else throw new Error('Failed to fetch plugins');

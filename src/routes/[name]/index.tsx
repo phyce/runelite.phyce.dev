@@ -8,7 +8,7 @@ import { useLocation } from '@builder.io/qwik-city';
 export default component$(() => {
 	const loc = useLocation();
 	const pluginResource = useResource$<Plugin>(async ({ track, cleanup }) => {
-		const response = await fetch('http://api.runelite.phyce.dev/plugins/' + loc.params.name); // Adjust the URL/port as necessary
+		const response = await fetch('http://osrs-stats:8080/plugins/' + loc.params.name);
 		const jsonResponse = await response.json();
 
 		if (jsonResponse.success) return jsonResponse.data;
