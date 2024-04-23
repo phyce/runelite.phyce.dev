@@ -1,13 +1,16 @@
-import { component$, Resource, useResource$ } from '@builder.io/qwik';
+import {component$, Resource, useResource$, useSignal, useVisibleTask$} from '@builder.io/qwik';
 import type {DocumentHead} from "@builder.io/qwik-city";
 import Plugin from '~/interfaces/plugin';
-import { formatDate, formatNumber } from '~/utils/utils';
+import PluginHistoryData from '~/interfaces/pluginHistoryData';
+import { formatDate, formatDateTime, formatNumber } from '~/utils/utils';
 import { useLocation } from '@builder.io/qwik-city';
+import { Chart, registerables } from 'chart.js/auto';
 
 
 export default component$(() => {
 	const loc = useLocation();
 	const pluginResource = useResource$<Plugin>(async ({ track, cleanup }) => {
+		// const response = await fetch('http://127.0.0.1:8080/plugins/' + loc.params.name);
 		const response = await fetch('http://osrs-stats:8080/plugins/' + loc.params.name);
 		const jsonResponse = await response.json();
 
@@ -15,12 +18,64 @@ export default component$(() => {
 		else throw new Error('Failed to fetch plugins');
 	});
 
+	const pluginInstallDataResource = useResource$<PluginHistoryData[]>( async ({ track, cleanup }) => {
+		// const response = await fetch('http://127.0.0.1:8080/plugins/' + loc.params.name + '/history');
+		const response = await fetch('http://osrs-stats:8080/plugins/' + loc.params.name + '/history');
+		const jsonResponse = await response.json();
+
+		if (jsonResponse.success) return jsonResponse.data.map((entry: { date: string; }) => ({
+			...entry,
+			date: formatDateTime(entry.date) // Assuming 'date' is a property of each entry
+		}));
+		else throw new Error('Failed to fetch plugin history');
+	});
+
+	const myChart = useSignal<HTMLCanvasElement>();
+	const historyDataSignal = useSignal<PluginHistoryData[] | null>(null);
+
+	useVisibleTask$(() => {
+		const historyData = historyDataSignal.value;
+		if (myChart?.value) {
+			Chart.register(...registerables);
+			new Chart(myChart.value, {
+				type: 'line',
+				data: {
+					labels: historyData?.map((data: { date: string; }) => data.date),
+					datasets: [{
+						label: 'Install Count Over Time',
+						data: historyData?.map((data: { count: number; }) => data.count),
+						borderColor: 'rgb(255,108,33)',
+						backgroundColor: 'rgb(197,72,4)',
+						pointRadius: 4,
+						pointHoverRadius: 7
+					}]
+				},
+				options: {
+					scales: {
+						x: {
+							ticks: {
+								color: "#FF6C21FF"
+							}
+						},
+						y: {
+							ticks: {
+								color: "#FF6C21FF"
+							},
+							beginAtZero: true
+						}
+					}
+				}
+			});
+		}
+	});
+
+
 	return (
-		<div>
+		<div class="flex flex-col sm:flex-row w-full h-full">
 			<Resource
 				value={pluginResource}
 				onResolved={(plugin) => (
-					<div class="rounded-lg border bg-card text-card-foreground shadow-sm w-full max-w-md">
+					<div class="w-full sm:w-1/3 rounded-lg border bg-card text-card-foreground shadow-sm w-full max-w-md">
 						<div class="flex flex-col p-6 pb-6 space-y-2">
 							<h3 class="whitespace-nowrap text-4xl text-orange-600 font-semibold leading-none tracking-tight">{plugin.display}</h3>
 							<p class="text-sm text-gray-300">{plugin.description}</p>
@@ -50,7 +105,7 @@ export default component$(() => {
 								</div>
 							</div>
 						</div>
-						<div class=" p-6 flex justify-start gap-4">
+						<div class="p-6 flex justify-start gap-4">
 
 							<a class="hover:underline text-orange-500" target="_blank" href={plugin.git_repo}>GitHub</a>
 							<a class="hover:underline text-orange-500" target="_blank" href={"https://runelite.net/plugin-hub/show/" + plugin.name}>Runelite</a>
@@ -58,6 +113,17 @@ export default component$(() => {
 						</div>
 					</div>
 				)}
+			/>
+			<Resource
+				value={pluginInstallDataResource}
+				onResolved={(historyData) => {
+					historyDataSignal.value = historyData; // Update the signal with the resolved data
+					return (
+						<div class="w-full sm:w-2/3">
+							<canvas ref={myChart} id="historyChart"></canvas>
+						</div>
+					);
+				}}
 			/>
 		</div>
 	);

@@ -5,6 +5,7 @@ import { formatDate, truncateString } from '~/utils/utils';
 
 export default component$(() => {
     const pluginsResource = useResource$<Plugin[]>(async ({ track, cleanup }) => {
+        // const response = await fetch('http://127.0.0.1:8080/plugins');
         const response = await fetch('http://osrs-stats:8080/plugins');
         const jsonResponse = await response.json();
         if (jsonResponse.success) return jsonResponse.data;
@@ -46,8 +47,9 @@ export default component$(() => {
                                             <td class="py-1 px-3">
                                                 <a
                                                     class="text-organge-600 hover:underline text-orange-500"
-                                                    href={"/" + plugin.name}
-                                                    target="_blank">{plugin.current_installs}</a>
+                                                    href={"/" + plugin.name}>
+                                                    {plugin.current_installs}
+                                                </a>
                                             </td>
                                             <td class="py-1 px-3">{plugin.all_time_high}</td>
 
