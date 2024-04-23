@@ -44,19 +44,13 @@ export default component$(() => {
                                                     href={"https://runelite.net/plugin-hub/show/" + plugin.name}
                                                     target="_blank">{plugin.display}</a>
                                             </td>
-                                            <td class="py-1 px-3">
-                                                <a
-                                                    class="text-organge-600 hover:underline text-orange-500"
-                                                    href={"/" + plugin.name}>
-                                                    {plugin.current_installs}
-                                                </a>
-                                            </td>
+                                            <td class="py-1 px-3">{plugin.current_installs}</td>
                                             <td class="py-1 px-3">{plugin.all_time_high}</td>
 
                                             <td class="py-1 px-3">{truncateString(plugin.description, 100, '...')}</td>
                                             <td class="py-1 px-3">{formatDate(plugin.updated_on)}</td>
                                             <td class="py-1 px-3">
-                                                <a href={plugin.git_repo} target="_blank" class="text-organge-600 hover:underline text-orange-500">View Repo</a>
+                                                <a href={"/" + plugin.name} target="_blank" class="text-organge-600 hover:underline text-orange-500">View Stats</a>
                                             </td>
                                         </tr>
                                     ))
