@@ -10,8 +10,8 @@ import { Chart, registerables } from 'chart.js/auto';
 export default component$(() => {
 	const loc = useLocation();
 	const pluginResource = useResource$<Plugin>(async ({ track, cleanup }) => {
-		// const response = await fetch('http://127.0.0.1:8080/plugins/' + loc.params.name);
-		const response = await fetch('http://osrs-stats:8080/plugins/' + loc.params.name);
+		const response = await fetch('http://api.runelite.phyce.dev/plugins/' + loc.params.name);
+		// const response = await fetch('http://osrs-stats:8080/plugins/' + loc.params.name);
 		const jsonResponse = await response.json();
 
 		if (jsonResponse.success) return jsonResponse.data;
@@ -19,8 +19,8 @@ export default component$(() => {
 	});
 
 	const pluginInstallDataResource = useResource$<PluginHistoryData[]>( async ({ track, cleanup }) => {
-		// const response = await fetch('http://127.0.0.1:8080/plugins/' + loc.params.name + '/history');
-		const response = await fetch('http://osrs-stats:8080/plugins/' + loc.params.name + '/history');
+		const response = await fetch('http://api.runelite.phyce.dev/plugins/' + loc.params.name + '/history');
+		// const response = await fetch('http://osrs-stats:8080/plugins/' + loc.params.name + '/history');
 		const jsonResponse = await response.json();
 
 		if (jsonResponse.success) return jsonResponse.data.map((entry: { date: string; }) => ({
@@ -33,7 +33,22 @@ export default component$(() => {
 	const myChart = useSignal<HTMLCanvasElement>();
 	const historyDataSignal = useSignal<PluginHistoryData[] | null>(null);
 
+
+
 	useVisibleTask$(() => {
+		const pageLoadTime = new Date();
+
+		const intervalId = setInterval(() => {
+			const currentTime = new Date();
+			const currentMinute = currentTime.getMinutes();
+			const elapsedTime = (currentTime.getTime() - pageLoadTime.getTime()) / 60000; // Elapsed time in minutes
+
+			// Check if it's the 55th minute and at least a minute has elapsed since page load
+			if (currentMinute === 1 && elapsedTime > 1) {
+				window.location.reload();
+			}
+		}, 30000);
+
 		const historyData = historyDataSignal.value;
 		if (myChart?.value) {
 			Chart.register(...registerables);
