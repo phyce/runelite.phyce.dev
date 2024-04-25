@@ -10,12 +10,12 @@ interface SortState {
 }
 
 export default component$(() => {
-    const sortState = useStore<SortState>({ field: null, direction: 'asc' });
+    const sortState = useStore<SortState>({ field: 'name', direction: 'asc' });
     const isInitialLoad = useSignal(true);
 
     const pluginsResource = useResource$<Plugin[]>(async ({ track, cleanup }) => {
-        const response = await fetch('http://api.runelite.phyce.dev/plugins');
-        // const response = await fetch('http://osrs-stats:8080/plugins');
+        // const response = await fetch('http://api.runelite.phyce.dev/plugins');
+        const response = await fetch('http://osrs-stats:8080/plugins');
         const jsonResponse = await response.json();
         if (jsonResponse.success) return jsonResponse.data;
         else throw new Error('Failed to fetch plugins');
@@ -58,19 +58,19 @@ export default component$(() => {
                             <thead
                                 class="text-xs uppercase bg-orange-800 text-orange-100 rounded">
                             <tr>
-                                <th scope="col" class="py-3 px-3 cursor-pointer" onClick$={() => handleSort('name')}>
+                                <th scope="col" class="py-3 px-3 cursor-pointer hover:underline" onClick$={() => handleSort('name')}>
                                     Name {sortState.field === 'name' ? (sortState.direction === 'asc' ? '↑' : '↓') : ''}
                                 </th>
-                                <th scope="col" class="py-3 px-3 cursor-pointer" onClick$={() => handleSort('current_installs')}>
+                                <th scope="col" class="py-3 px-3 cursor-pointer hover:underline" onClick$={() => handleSort('current_installs')}>
                                     Current Installs {sortState.field === 'current_installs' ? (sortState.direction === 'asc' ? '↑' : '↓') : ''}
                                 </th>
-                                <th scope="col" class="py-3 px-3 cursor-pointer" onClick$={() => handleSort('all_time_high')}>
+                                <th scope="col" class="py-3 px-3 cursor-pointer hover:underline" onClick$={() => handleSort('all_time_high')}>
                                     All Time High {sortState.field === 'all_time_high' ? (sortState.direction === 'asc' ? '↑' : '↓') : ''}
                                 </th>
-                                <th scope="col" class="py-3 px-3 cursor-pointer" onClick$={() => handleSort('description')}>
+                                <th scope="col" class="py-3 px-3 cursor-pointer hover:underline" onClick$={() => handleSort('description')}>
                                     Description {sortState.field === 'description' ? (sortState.direction === 'asc' ? '↑' : '↓') : ''}
                                 </th>
-                                <th scope="col" class="py-3 px-3 cursor-pointer" onClick$={() => handleSort('updated_on')}>
+                                <th scope="col" class="py-3 px-3 cursor-pointer hover:underline" onClick$={() => handleSort('updated_on')}>
                                     Updated On {sortState.field === 'updated_on' ? (sortState.direction === 'asc' ? '↑' : '↓') : ''}
                                 </th>
                                 <th scope="col" class="py-3 px-3"></th>
