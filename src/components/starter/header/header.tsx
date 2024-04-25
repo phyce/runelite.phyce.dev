@@ -19,8 +19,7 @@ export default component$(() => {
   const fetchRandomPlugin = $(async (): Promise<void> => {
     store.loading = true;
     try {
-      // const response = await fetch('https://api.runelite.phyce.dev/plugins/random');
-      const response = await fetch('https://osrs-stats:8080/plugins/random');
+      const response = await fetch('https://api.runelite.phyce.dev/plugins/random');
       if (!response.ok) throw new Error('Failed to fetch plugin data');
 
       const apiResponse: ApiResponse<Plugin> = await response.json();
