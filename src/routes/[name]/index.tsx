@@ -5,29 +5,17 @@ import PluginHistoryData from '~/interfaces/pluginHistoryData';
 import { formatDate, formatDateTime, formatNumber } from '~/utils/utils';
 import { useLocation } from '@builder.io/qwik-city';
 import { Chart, registerables } from 'chart.js/auto';
+import {get} from "~/utils/http";
 
 
 export default component$(() => {
 	const loc = useLocation();
 	const pluginResource = useResource$<Plugin>(async ({ track, cleanup }) => {
-		// const response = await fetch('http://api.runelite.phyce.dev/plugins/' + loc.params.name);
-		const response = await fetch('http://osrs-stats:8080/plugins/' + loc.params.name);
-		const jsonResponse = await response.json();
-
-		if (jsonResponse.success) return jsonResponse.data;
-		else throw new Error('Failed to fetch plugins');
+		return get<Plugin>("/plugins/" + loc.params.name);
 	});
 
 	const pluginInstallDataResource = useResource$<PluginHistoryData[]>( async ({ track, cleanup }) => {
-		// const response = await fetch('http://api.runelite.phyce.dev/plugins/' + loc.params.name + '/history');
-		const response = await fetch('http://osrs-stats:8080/plugins/' + loc.params.name + '/history');
-		const jsonResponse = await response.json();
-
-		if (jsonResponse.success) return jsonResponse.data.map((entry: { date: string; }) => ({
-			...entry,
-			date: formatDateTime(entry.date) // Assuming 'date' is a property of each entry
-		}));
-		else throw new Error('Failed to fetch plugin history');
+		return get<PluginHistoryData[]>("/plugins/" + loc.params.name + "/history");
 	});
 
 	const myChart = useSignal<HTMLCanvasElement>();

@@ -1,12 +1,17 @@
 import {component$, Resource, useResource$, useStore, $, useSignal} from '@builder.io/qwik';
 import type {DocumentHead} from "@builder.io/qwik-city";
-import Plugin from '~/interfaces/plugin';
+import type Plugin from '~/interfaces/plugin';
 import { formatDate, truncateString } from '~/utils/utils';
-import PluginHistoryData from "~/interfaces/pluginHistoryData";
+import {get} from "~/utils/http";
 
 interface SortState {
     field: keyof Plugin | null;
     direction: 'asc' | 'desc';
+}
+
+interface Column {
+    name: string;
+    display: string;
 }
 
 export default component$(() => {
@@ -14,14 +19,18 @@ export default component$(() => {
     const isInitialLoad = useSignal(true);
 
     const pluginsResource = useResource$<Plugin[]>(async ({ track, cleanup }) => {
-        // const response = await fetch('http://api.runelite.phyce.dev/plugins');
-        const response = await fetch('http://osrs-stats:8080/plugins');
-        const jsonResponse = await response.json();
-        if (jsonResponse.success) return jsonResponse.data;
-        else throw new Error('Failed to fetch plugins');
+        return get<Plugin[]>("/plugins");
     });
 
     const pluginSignal = useSignal<Plugin[] | null>(null);
+
+    const columns: Column[] = [
+        {name: "name", display: "Name"},
+        {name: "current_installs", display: "Current Installs"},
+        {name: "all_time_high", display: "All Time High"},
+        {name: "description", display: "Description"},
+        {name: "updated_on", display: "Updated On"},
+    ]
 
     return (
       <div>
@@ -31,7 +40,7 @@ export default component$(() => {
 
                     if (isInitialLoad.value) {
                         pluginSignal.value = plugins;
-                        isInitialLoad.value = false; // Set flag to false after initial load
+                        isInitialLoad.value = false;
                     }
 
                     const handleSort = $((field: keyof Plugin) => {
@@ -58,21 +67,13 @@ export default component$(() => {
                             <thead
                                 class="text-xs uppercase bg-orange-800 text-orange-100 rounded">
                             <tr>
-                                <th scope="col" class="py-3 px-3 cursor-pointer hover:underline" onClick$={() => handleSort('name')}>
-                                    Name {sortState.field === 'name' ? (sortState.direction === 'asc' ? '↑' : '↓') : ''}
-                                </th>
-                                <th scope="col" class="py-3 px-3 cursor-pointer hover:underline" onClick$={() => handleSort('current_installs')}>
-                                    Current Installs {sortState.field === 'current_installs' ? (sortState.direction === 'asc' ? '↑' : '↓') : ''}
-                                </th>
-                                <th scope="col" class="py-3 px-3 cursor-pointer hover:underline" onClick$={() => handleSort('all_time_high')}>
-                                    All Time High {sortState.field === 'all_time_high' ? (sortState.direction === 'asc' ? '↑' : '↓') : ''}
-                                </th>
-                                <th scope="col" class="py-3 px-3 cursor-pointer hover:underline" onClick$={() => handleSort('description')}>
-                                    Description {sortState.field === 'description' ? (sortState.direction === 'asc' ? '↑' : '↓') : ''}
-                                </th>
-                                <th scope="col" class="py-3 px-3 cursor-pointer hover:underline" onClick$={() => handleSort('updated_on')}>
-                                    Updated On {sortState.field === 'updated_on' ? (sortState.direction === 'asc' ? '↑' : '↓') : ''}
-                                </th>
+                                {
+                                    columns.map((column) => (
+                                        <th scope="col" class="py-3 px-3 cursor-pointer hover:underline" onClick$={() => handleSort(column.name as keyof Plugin)}>
+                                            {column.display} {sortState.field === column.name ? (sortState.direction === 'asc' ? '↑' : '↓') : ''}
+                                        </th>
+                                    ))
+                                }
                                 <th scope="col" class="py-3 px-3"></th>
                             </tr>
                             </thead>
