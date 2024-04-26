@@ -1,6 +1,7 @@
 {
-  "name": "my-qwik-basic-starter",
-  "description": "Demo App with Routing built-in (recommended)",
+  "name": "runelite.phyce.dev",
+  "author": "me@phyce.dev",
+  "description": "Runelite stats tracker",
   "engines": {
     "node": "^18.17.0 || ^20.3.0 || >=21.0.0"
   },

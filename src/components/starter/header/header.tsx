@@ -1,6 +1,7 @@
-import {component$, useStore, $} from "@builder.io/qwik";
+import {component$, useStore, $, Resource} from "@builder.io/qwik";
 import Plugin from '~/interfaces/plugin';
 import {get} from "~/utils/http";
+import {getConfig} from "~/utils/config";
 
 export default component$(() => {
   const store = useStore<{
@@ -27,13 +28,17 @@ export default component$(() => {
     }
   });
 
+
   return (
     <header class="flex items-center px-4 py-3">
       <div>
         <a class="inline-block align-middle" href="/" title="Runelite Plugin Stats">
           <img width="64" height="64" src="/img/runelite.png"/>
         </a>&nbsp;
-        <a href="/" class="text-white text-3xl inline-block align-middle">RUNELITE PLUGIN STATS</a>
+        <a href="/" class="text-white text-3xl inline-block align-middle">RUNELITE PLUGIN STATS</a> v{getConfig().version}
+        <small>
+
+        </small>
       </div>
       <div class="flex ml-auto mr-auto items-center space-x-2">
         <button
