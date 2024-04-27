@@ -1,8 +1,8 @@
-import {component$, Resource, useResource$, useStore, $, useSignal, useContext} from '@builder.io/qwik';
+import {component$, Resource, useResource$, useStore, $, useSignal, useContext, useTask$} from '@builder.io/qwik';
 import type {DocumentHead} from "@builder.io/qwik-city";
 import type Plugin from '~/interfaces/plugin';
 import { formatDate, truncateString } from '~/utils/utils';
-import {PluginsContext} from "~/resources/plugins";
+import {globalContextId} from "~/providers/plugins";
 
 interface SortState {
     field: keyof Plugin | null;
@@ -23,7 +23,12 @@ export default component$(() => {
 
     // const pluginSignal = useSignal<Plugin[] | null>(null);
 
-    const pluginSignal = useContext(PluginsContext);
+    const context = useContext(globalContextId);
+    const plugins = {data:context.plugins.value};
+
+    useTask$(async function loadPlugins({track}) {
+        track(() => context.plugins.value);
+    });
 
     const columns: Column[] = [
         {name: "name", display: "Name"},
@@ -38,8 +43,8 @@ export default component$(() => {
         sortState.field = field;
         sortState.direction = newDirection;
 
-        const sortPlugins = (plugins: Plugin[], field: keyof Plugin, direction: 'asc' | 'desc') => {
-            return [...plugins].sort((a, b) => {
+        const sortPlugins = (pluginData: Plugin[], field: keyof Plugin, direction: 'asc' | 'desc') => {
+            return [...pluginData].sort((a, b) => {
                 const valueA = a[field];
                 const valueB = b[field];
                 if (typeof valueA === 'number' && typeof valueB === 'number') {
@@ -48,7 +53,8 @@ export default component$(() => {
                 return direction === 'asc' ? `${valueA}`.localeCompare(`${valueB}`) : `${valueB}`.localeCompare(`${valueA}`);
             });
         };
-        pluginSignal.plugins.value = sortPlugins(pluginSignal.plugins.value, field, newDirection);
+        plugins.data = sortPlugins(plugins.data, field, newDirection);
+        console.log(plugins.data);
     });
 
     return (
@@ -70,7 +76,7 @@ export default component$(() => {
                 </thead>
                 <tbody>
                 {
-                    pluginSignal.plugins.value?.map((plugin) => (
+                    plugins.data?.map((plugin) => (
                         <tr class="border-b bg-neutral-800 border-gray-700 text-gray-300 hover:bg-neutral-700"
                             title={plugin.warning}
                             key={plugin.id}>

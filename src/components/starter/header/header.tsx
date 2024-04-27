@@ -1,12 +1,21 @@
-import {component$, useStore, $, Resource, useResource$, useContextProvider, useContext} from "@builder.io/qwik";
+import {
+	component$,
+	useStore,
+	$,
+	Resource,
+	useResource$,
+	useContextProvider,
+	useContext,
+	useTask$
+} from "@builder.io/qwik";
 import Plugin from '~/interfaces/plugin';
 import {get} from "~/utils/http";
 import {getConfig} from "~/utils/config";
-import {PluginsContext} from "~/resources/plugins";
+import {globalContextId} from "~/providers/plugins";
 
 
 export default component$(() => {
-	const pluginSignal = useContext(PluginsContext);
+	const context = useContext(globalContextId);
 
 	const fetchRandomPlugin = $(async (): Promise<void> => {
 		try {
@@ -21,13 +30,17 @@ export default component$(() => {
 		return get<Plugin[]>("/plugins");
 	});
 
+	useTask$(async function loadPlugins({track}) {
+		track(() => context.plugins.value);
+	});
+
 	return (
 		<header class="flex items-center px-4 py-3">
 			<div>
 				<Resource
 					value={pluginsResource}
 					onResolved={(pluginsData) => {
-						pluginSignal.plugins.value = pluginsData;
+						context.plugins.value = pluginsData;
 						return (<></>);
 					}}/>
 				<a class="inline-block align-middle" href="/" title="Runelite Plugin Stats">
