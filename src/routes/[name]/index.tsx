@@ -31,7 +31,6 @@ export default component$(() => {
 			const currentMinute = currentTime.getMinutes();
 			const elapsedTime = (currentTime.getTime() - pageLoadTime.getTime()) / 60000; // Elapsed time in minutes
 
-			// Check if it's the 55th minute and at least a minute has elapsed since page load
 			if (currentMinute === 1 && elapsedTime > 1) {
 				window.location.reload();
 			}
