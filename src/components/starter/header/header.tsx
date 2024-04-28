@@ -75,7 +75,7 @@ export default component$(() => {
 				<a class="inline-block align-middle" href="/" title="Runelite Plugin Stats">
 					<img width="64" height="64" src="/img/runelite.png"/>
 				</a>&nbsp;
-				<a href="/" class="text-white text-3xl inline-block align-middle">RUNELITE PLUGIN STATS</a> v{getConfig().version}
+				<a href="/" class="text-white text-3xl inline-block align-middle">Runelite Plugin Stats</a> v{getConfig().version}
 			</div>
 			<div class="flex ml-auto mr-auto items-center space-x-2 relative">
 				<button
@@ -99,14 +99,18 @@ export default component$(() => {
 						value={searchInput.value}
 						onInput$={handleSearchChange}
 						onFocus$={() => {searchInputVisible.value=true}}
-						onBlur$={() => {searchInputVisible.value=false}}
+						onBlur$={() => {
+							setTimeout(() => {
+								searchInputVisible.value=false;
+							}, 200);
+						}}
 					/>
 					{searchInputVisible.value && (
 						<div class="absolute top-10 bg-neutral-700 rounded mt-1 w-full z-50 text-white shadow-lg overflow-y-auto max-h-96 scrollbar-custom">
 							{searchResultSignal.value?.map(plugin => (
-								<div key={plugin.id} class="p-2 hover:bg-neutral-600 cursor-pointer">
+								<a href={"/" + plugin.name}><div key={plugin.id} class="p-2 hover:bg-neutral-600 text-white">
 									{plugin.display}
-								</div>
+								</div></a>
 							))}
 						</div>
 					)}
