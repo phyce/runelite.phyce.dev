@@ -62,3 +62,30 @@ body {
   .github-corner:hover .octo-arm{animation:none}
   .github-corner .octo-arm { animation:octocat-wave 560ms ease-in-out }
 }
+
+body {
+  --sb-track-color: #33363a;
+  --sb-thumb-color: #c2410c;
+  --sb-size: 8px;
+}
+
+body::-webkit-scrollbar, .scrollbar-custom::-webkit-scrollbar {
+  width: var(--sb-size);
+}
+
+body::-webkit-scrollbar-track, .scrollbar-custom::-webkit-scrollbar-track {
+  background: var(--sb-track-color);
+  border-radius: 4px;
+}
+
+body::-webkit-scrollbar-thumb, .scrollbar-custom::-webkit-scrollbar-thumb {
+  background: var(--sb-thumb-color);
+  border-radius: 4px;
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  body, .scrollbar-custom {
+    scrollbar-color: var(--sb-thumb-color)
+    var(--sb-track-color);
+  }
+}
