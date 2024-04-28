@@ -1,4 +1,9 @@
-import { createContextId, type Signal, useSignal } from '@builder.io/qwik';
+import {
+	createContextId,
+	ReadonlySignal,
+	type Signal,
+	useSignal
+} from '@builder.io/qwik';
 import Plugin from '~/interfaces/plugin';
 
 export interface GlobalContext {
@@ -7,8 +12,13 @@ export interface GlobalContext {
 
 export const globalContextId = createContextId<GlobalContext>('plugin.context');
 
-export function useGlobalProvider(): GlobalContext {
-	const plugins = useSignal<Plugin[]>([]);
+interface GlobalProviderParams {
+	pluginData : Plugin[];
+}
+
+export function useGlobalProvider(params: GlobalProviderParams): GlobalContext {
+	const { pluginData = [] } = params;
+	const plugins = useSignal<Plugin[]>(pluginData);
 
 	return {
 		plugins,

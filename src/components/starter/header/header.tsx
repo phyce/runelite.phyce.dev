@@ -17,19 +17,9 @@ export default component$(() => {
 		}
 	});
 
-	const pluginsResource = useResource$<Plugin[]>(async ({ track, cleanup }) => {
-		return get<Plugin[]>("/plugins");
-	});
-
 	return (
 		<header class="flex items-center px-4 py-3">
 			<div>
-				<Resource
-					value={pluginsResource}
-					onResolved={(pluginsData) => {
-						globalContext.plugins.value = pluginsData;
-						return (<></>);
-					}}/>
 				<a class="inline-block align-middle" href="/" title="Runelite Plugin Stats">
 					<img width="64" height="64" src="/img/runelite.png"/>
 				</a>&nbsp;

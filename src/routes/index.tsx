@@ -28,16 +28,8 @@ interface Column {
 
 export default component$(() => {
     const sortState = useStore<SortState>({ field: 'name', direction: 'asc' });
-
-    // const pluginsResource = useResource$<Plugin[]>(async ({ track, cleanup }) => {
-    //     return get<Plugin[]>("/plugins");
-    // });
-
-    // const pluginSignal = useSignal<Plugin[] | null>(null);
-
     const globalContext = useContext(globalContextId);
-    // const pluginsData = useStore<Plugin[]>([]);
-
+    const pluginSignal = useSignal<Plugin[]>(globalContext.plugins.value);
 
     const columns: Column[] = [
         {name: "name", display: "Name"},
@@ -63,7 +55,7 @@ export default component$(() => {
             });
         };
 
-        globalContext.plugins.value = sortPlugins(globalContext.plugins.value, field, newDirection);
+        pluginSignal.value = sortPlugins(pluginSignal.value, field, newDirection);
     });
 
     return (
@@ -85,7 +77,7 @@ export default component$(() => {
                 </thead>
                 <tbody>
                 {
-                    globalContext.plugins.value?.map((plugin) => (
+                    pluginSignal.value?.map((plugin) => (
                         <tr class="border-b bg-neutral-800 border-gray-700 text-gray-300 hover:bg-neutral-700"
                             title={plugin.warning}
                             key={plugin.id}>
