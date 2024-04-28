@@ -2,11 +2,11 @@ import {component$, useStore, $, Resource, useResource$, useContextProvider, use
 import Plugin from '~/interfaces/plugin';
 import {get} from "~/utils/http";
 import {getConfig} from "~/utils/config";
-import {PluginsContext} from "~/resources/plugins";
+import {globalContextId} from "~/providers/global";
 
 
 export default component$(() => {
-	const pluginSignal = useContext(PluginsContext);
+	const globalContext = useContext(globalContextId);
 
 	const fetchRandomPlugin = $(async (): Promise<void> => {
 		try {
@@ -27,7 +27,7 @@ export default component$(() => {
 				<Resource
 					value={pluginsResource}
 					onResolved={(pluginsData) => {
-						pluginSignal.plugins.value = pluginsData;
+						globalContext.plugins.value = pluginsData;
 						return (<></>);
 					}}/>
 				<a class="inline-block align-middle" href="/" title="Runelite Plugin Stats">

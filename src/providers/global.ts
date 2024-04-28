@@ -1,11 +1,13 @@
 import { createContextId, type Signal, useSignal } from '@builder.io/qwik';
 import Plugin from '~/interfaces/plugin';
 
-export const PluginsContext = createContextId<{
+export interface GlobalContext {
 	plugins: Signal<Plugin[]>;
-}>('plugin.context');
+}
 
-export function usePluginsProvider() {
+export const globalContextId = createContextId<GlobalContext>('plugin.context');
+
+export function useGlobalProvider(): GlobalContext {
 	const plugins = useSignal<Plugin[]>([]);
 
 	return {

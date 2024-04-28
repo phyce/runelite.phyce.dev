@@ -1,13 +1,25 @@
-import {component$, Resource, useResource$, useStore, $, useSignal, useContext} from '@builder.io/qwik';
+import {
+    component$,
+    Resource,
+    useResource$,
+    useStore,
+    $,
+    useSignal,
+    useContext,
+    useTask$,
+    QRL, implicit$FirstArg
+} from '@builder.io/qwik';
 import type {DocumentHead} from "@builder.io/qwik-city";
 import type Plugin from '~/interfaces/plugin';
 import { formatDate, truncateString } from '~/utils/utils';
-import {PluginsContext} from "~/resources/plugins";
+import {globalContextId} from "~/providers/global";
 
 interface SortState {
     field: keyof Plugin | null;
     direction: 'asc' | 'desc';
 }
+
+
 
 interface Column {
     name: string;
@@ -23,7 +35,9 @@ export default component$(() => {
 
     // const pluginSignal = useSignal<Plugin[] | null>(null);
 
-    const pluginSignal = useContext(PluginsContext);
+    const globalContext = useContext(globalContextId);
+    // const pluginsData = useStore<Plugin[]>([]);
+
 
     const columns: Column[] = [
         {name: "name", display: "Name"},
@@ -48,7 +62,8 @@ export default component$(() => {
                 return direction === 'asc' ? `${valueA}`.localeCompare(`${valueB}`) : `${valueB}`.localeCompare(`${valueA}`);
             });
         };
-        pluginSignal.plugins.value = sortPlugins(pluginSignal.plugins.value, field, newDirection);
+
+        globalContext.plugins.value = sortPlugins(globalContext.plugins.value, field, newDirection);
     });
 
     return (
@@ -70,7 +85,7 @@ export default component$(() => {
                 </thead>
                 <tbody>
                 {
-                    pluginSignal.plugins.value?.map((plugin) => (
+                    globalContext.plugins.value?.map((plugin) => (
                         <tr class="border-b bg-neutral-800 border-gray-700 text-gray-300 hover:bg-neutral-700"
                             title={plugin.warning}
                             key={plugin.id}>
