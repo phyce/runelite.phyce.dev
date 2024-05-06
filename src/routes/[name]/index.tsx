@@ -14,11 +14,19 @@ export default component$(() => {
 	const globalContext = useContext(globalContextId);
 	const filterSignal = useSignal<Record<string, string>>(globalContext.filters.value);
 	const pluginResource = useResource$<Plugin>(async ({ track, cleanup }) => {
-		return get<Plugin>("plugin/" + loc.params.name, undefined, filterSignal.value);
+		const result = await get<Plugin | null>("plugin/" + loc.params.name, undefined, filterSignal.value);
+		if (result === null) {
+			throw new Error("Plugin not found");
+		}
+		return result; // This now guarantees that result is never null, matching ResourceFn<Plugin>
 	});
 
-	const pluginInstallDataResource = useResource$<PluginHistoryData[]>( async ({ track, cleanup }) => {
-		return get<PluginHistoryData[]>("plugin/" + loc.params.name + "/history", undefined, filterSignal.value);
+	const pluginInstallDataResource = useResource$<PluginHistoryData[]>(async ({ track, cleanup }) => {
+		const history = await get<PluginHistoryData[] | null>("plugin/" + loc.params.name + "/history", undefined, filterSignal.value);
+		if (history === null) {
+			throw new Error("Plugin history data not found");
+		}
+		return history; // This guarantees that history is never null
 	});
 
 	const myChart = useSignal<HTMLCanvasElement>();

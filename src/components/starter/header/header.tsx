@@ -23,7 +23,7 @@ export default component$(() => {
 	const fetchRandomPlugin = $(async (): Promise<void> => {
 		try {
 			const randomPlugin = await get<Plugin>("plugins/random");
-			window.location.href = `/${randomPlugin.name}`;
+			if(randomPlugin != null)window.location.href = `/${randomPlugin.name}`;
 		} catch (error: any) {
 			console.error("Error fetching random plugin:", error);
 		}
