@@ -1,25 +1,20 @@
 import {
     component$,
-    Resource,
-    useResource$,
     useStore,
     $,
     useSignal,
     useContext,
-    useTask$,
-    QRL, implicit$FirstArg
+    useVisibleTask$
 } from '@builder.io/qwik';
-import type {DocumentHead} from "@builder.io/qwik-city";
+import type {DocumentHead, RequestHandler} from "@builder.io/qwik-city";
 import type Plugin from '~/interfaces/plugin';
-import { formatDate, truncateString } from '~/utils/utils';
+import { formatDate, truncateString, updateUrlParamsFromCookie } from '~/utils/utils';
 import {globalContextId} from "~/providers/global";
 
 interface SortState {
     field: keyof Plugin | null;
     direction: 'asc' | 'desc';
 }
-
-
 
 interface Column {
     name: string;
@@ -58,6 +53,10 @@ export default component$(() => {
         pluginSignal.value = sortPlugins(pluginSignal.value, field, newDirection);
     });
 
+    useVisibleTask$(() => {
+        updateUrlParamsFromCookie();
+    });
+
     return (
       <div>
         <div class="overflow-x-auto relative shadow-md sm:rounded-lg p-2">
@@ -83,9 +82,9 @@ export default component$(() => {
                             key={plugin.id}>
                             <td class="py-1 px-3">
                                 <a
-                                    class="text-organge-600 hover:underline text-orange-500"
+                                    class="hover:underline text-orange-500"
                                     href={"https://runelite.net/plugin-hub/show/" + plugin.name}
-                                    target="_blank">{plugin.display}</a>
+                                    target="_blank">{plugin.display ?? plugin.name}</a>
                             </td>
                             <td class="py-1 px-3">{plugin.current_installs}</td>
                             <td class="py-1 px-3">{plugin.all_time_high}</td>
@@ -93,7 +92,7 @@ export default component$(() => {
                             <td class="py-1 px-3">{truncateString(plugin.description, 100, '...')}</td>
                             <td class="py-1 px-3">{formatDate(plugin.updated_on)}</td>
                             <td class="py-1 px-3">
-                                <a href={"/" + plugin.name} class="text-organge-600 hover:underline text-orange-500">View Stats</a>
+                                <a href={"/" + plugin.name} class="hover:underline text-orange-500">View Stats</a>
                             </td>
                         </tr>
                     ))
