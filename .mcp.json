@@ -1,0 +1,12 @@
+{
+    "mcpServers": {
+        "laravel-boost": {
+            "command": "wsl.exe",
+            "args": [
+                "/usr/bin/php8.3",
+                "/home/phyce/docker/LEMP/web/runelite.phyce.dev/runelite.phyce.dev/artisan",
+                "boost:mcp"
+            ]
+        }
+    }
+}

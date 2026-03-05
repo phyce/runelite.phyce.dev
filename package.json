@@ -1,56 +1,52 @@
 {
-  "name": "runelite.phyce.dev",
-  "author": "me@phyce.dev",
-  "description": "Runelite stats tracker",
-  "engines": {
-    "node": "^18.17.0 || ^20.3.0 || >=21.0.0"
-  },
-  "engines-annotation": "Mostly required by sharp which needs a Node-API v9 compatible runtime",
-  "private": true,
-  "trustedDependencies": [
-    "sharp"
-  ],
-  "trustedDependencies-annotation": "Needed for bun to allow running install scripts",
-  "type": "module",
-  "scripts": {
-    "build": "qwik build",
-    "build.client": "vite build",
-    "build.preview": "vite build --ssr src/entry.preview.tsx",
-    "build.server": "vite build -c adapters/node-server/vite.config.ts",
-    "build.types": "tsc --incremental --noEmit",
-    "deploy": "echo 'Run \"npm run qwik add\" to install a server adapter'",
-    "dev": "vite --mode ssr",
-    "dev.debug": "node --inspect-brk ./node_modules/vite/bin/vite.js --mode ssr --force",
-    "fmt": "prettier --write .",
-    "fmt.check": "prettier --check .",
-    "lint": "eslint \"src/**/*.ts*\"",
-    "preview": "qwik build preview && vite preview --open",
-    "serve": "node server/entry.node-server",
-    "start": "vite --open --mode ssr",
-    "qwik": "qwik"
-  },
-  "devDependencies": {
-    "@builder.io/qwik": "^1.5.2",
-    "@builder.io/qwik-city": "^1.5.2",
-    "@types/eslint": "^8.56.6",
-    "@types/node": "^20.11.30",
-    "@typescript-eslint/eslint-plugin": "^7.3.1",
-    "@typescript-eslint/parser": "^7.3.1",
-    "autoprefixer": "^10.4.19",
-    "eslint": "^8.57.0",
-    "eslint-plugin-qwik": "^1.5.2",
-    "postcss": "^8.4.38",
-    "prettier": "^3.2.5",
-    "tailwindcss": "^3.4.3",
-    "typescript": "5.3.3",
-    "undici": "*",
-    "vite": "^5.1.6",
-    "vite-tsconfig-paths": "^4.2.1"
-  },
-  "dependencies": {
-    "@tanstack/table-core": "^8.16.0",
-    "chart.js": "^4.4.2",
-    "qwik-table": "^0.0.4",
-    "tablesort": "^5.3.0"
-  }
+    "$schema": "https://www.schemastore.org/package.json",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "build": "vite build",
+        "build:ssr": "vite build && vite build --ssr",
+        "dev": "vite",
+        "format": "prettier --write resources/",
+        "format:check": "prettier --check resources/",
+        "lint": "eslint . --fix",
+        "lint:check": "eslint .",
+        "types:check": "vue-tsc --noEmit"
+    },
+    "devDependencies": {
+        "@eslint/js": "^9.19.0",
+        "@laravel/vite-plugin-wayfinder": "^0.1.3",
+        "@types/node": "^22.13.5",
+        "@vue/eslint-config-typescript": "^14.3.0",
+        "eslint": "^9.17.0",
+        "eslint-config-prettier": "^10.0.1",
+        "eslint-import-resolver-typescript": "^4.4.4",
+        "eslint-plugin-import": "^2.32.0",
+        "eslint-plugin-vue": "^9.32.0",
+        "prettier": "^3.4.2",
+        "prettier-plugin-tailwindcss": "^0.6.11",
+        "typescript-eslint": "^8.23.0",
+        "vue-tsc": "^2.2.4"
+    },
+    "dependencies": {
+        "@inertiajs/vue3": "^2.3.7",
+        "@tailwindcss/vite": "^4.1.11",
+        "@vitejs/plugin-vue": "^6.0.0",
+        "@vueuse/core": "^12.8.2",
+        "chart.js": "^4.5.1",
+        "class-variance-authority": "^0.7.1",
+        "clsx": "^2.1.1",
+        "concurrently": "^9.0.1",
+        "laravel-vite-plugin": "^2.0.0",
+        "tailwind-merge": "^3.2.0",
+        "tailwindcss": "^4.1.1",
+        "typescript": "^5.2.2",
+        "vite": "^7.0.4",
+        "vue": "^3.5.13",
+        "vue-chartjs": "^5.3.3"
+    },
+    "optionalDependencies": {
+        "@rollup/rollup-linux-x64-gnu": "4.9.5",
+        "@tailwindcss/oxide-linux-x64-gnu": "^4.0.1",
+        "lightningcss-linux-x64-gnu": "^1.29.1"
+    }
 }
