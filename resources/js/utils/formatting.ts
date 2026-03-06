@@ -9,6 +9,14 @@ export function formatDate(dateString: string): string {
     return new Intl.DateTimeFormat('en-US', options).format(new Date(dateString));
 }
 
+export function formatChartDate(dateString: string, includeTime: boolean): string {
+    const date = new Date(dateString);
+    if (includeTime) {
+        return new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).format(date);
+    }
+    return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(date);
+}
+
 export function formatNumber(num: number): string {
     return num.toLocaleString('en-US');
 }

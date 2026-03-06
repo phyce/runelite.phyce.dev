@@ -32,16 +32,13 @@ class PluginController extends Controller
 
         return inertia('PluginDetail', [
             'plugin' => $plugin,
+            'plugins' => $this->runeliteApi->getPlugins([]),
         ]);
     }
 
     public function random(Request $request): RedirectResponse
     {
         $plugin = $this->runeliteApi->getRandomPlugin();
-
-        if ($plugin === null) {
-            return redirect()->route('home');
-        }
 
         return redirect()->route('plugin.show', ['name' => $plugin['name']]);
     }

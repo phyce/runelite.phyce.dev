@@ -70,6 +70,14 @@ body::-webkit-scrollbar-thumb {
     border-radius: 4px;
 }
 
+.scrollbar-none {
+    scrollbar-width: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+    display: none;
+}
+
 .github-corner:hover .octo-arm {
     animation: octocat-wave 560ms ease-in-out;
 }

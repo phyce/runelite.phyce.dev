@@ -45,15 +45,19 @@ function onBlur(): void {
             <a class="inline-block align-middle" href="/" title="Runelite Plugin Stats">
                 <img width="64" height="64" src="/img/runelite.png" alt="RuneLite logo" />
             </a>
-            <a href="/" class="inline-block align-middle text-3xl text-white">Runelite Plugin Stats</a>
+            <div class="inline-block align-middle">
+                <a href="/" class="text-3xl text-white">Runelite Plugin Stats</a>
+                <span class="ml-2 text-sm text-gray-300">v0.2.0</span>
+            </div>
         </div>
 
-        <div class="relative flex w-8/12 flex-col items-center space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
+        <div class="relative flex w-full flex-row items-center gap-2 sm:w-8/12">
             <button
-                class="flex h-10 min-w-48 flex-grow items-center justify-center rounded bg-orange-700 px-2 py-1 text-sm sm:flex-grow-0"
+                class="flex h-10 flex-shrink-0 items-center justify-center rounded bg-orange-700 px-3 py-1 text-sm"
+                title="Random Plugin"
                 @click="navigateRandom"
             >
-                Random Plugin
+                Random
                 <svg class="ml-2" width="28" height="28" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512">
                     <path
                         fill="#ffffff"

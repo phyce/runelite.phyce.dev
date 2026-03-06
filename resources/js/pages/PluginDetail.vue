@@ -3,7 +3,7 @@ import PluginHistoryController from '@/actions/App/Http/Controllers/Api/PluginHi
 import { show } from '@/actions/App/Http/Controllers/PluginController';
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { Plugin, PluginHistoryData } from '@/types';
-import { formatDate, formatNumber } from '@/utils/formatting';
+import { formatChartDate, formatDate, formatNumber } from '@/utils/formatting';
 import { Head, router, usePage } from '@inertiajs/vue3';
 import {
     CategoryScale,
@@ -30,6 +30,7 @@ const props = defineProps<{
 const page = usePage();
 const historyData = ref<PluginHistoryData[]>([]);
 const isLoading = ref(true);
+const chartRef = ref();
 
 const currentRange = ref<string>((page.props.ziggy as { query?: Record<string, string> })?.query?.range ?? 'all');
 
@@ -41,8 +42,9 @@ const chartData = ref({
             data: [] as number[],
             borderColor: 'rgb(255,108,33)',
             backgroundColor: 'rgba(197,72,4,0.3)',
-            pointRadius: 4,
-            pointHoverRadius: 7,
+            tension: 0.3,
+            pointRadius: 3,
+            pointHoverRadius: 6,
             fill: true,
         },
     ],
@@ -50,13 +52,40 @@ const chartData = ref({
 
 const chartOptions = {
     responsive: true,
-    maintainAspectRatio: true,
+    maintainAspectRatio: false,
+    plugins: {
+        legend: {
+            display: false,
+        },
+        tooltip: {
+            backgroundColor: 'rgba(30, 30, 30, 0.9)',
+            titleColor: '#FF6C21',
+            bodyColor: '#d1d5db',
+            borderColor: 'rgba(255, 108, 33, 0.3)',
+            borderWidth: 1,
+        },
+    },
     scales: {
         x: {
-            ticks: { color: '#FF6C21' },
+            ticks: {
+                color: '#FF6C21',
+                maxTicksLimit: 8,
+            },
+            grid: {
+                color: 'rgba(255, 108, 33, 0.08)',
+            },
+            border: {
+                color: 'rgba(255, 108, 33, 0.2)',
+            },
         },
         y: {
             ticks: { color: '#FF6C21' },
+            grid: {
+                color: 'rgba(255, 108, 33, 0.08)',
+            },
+            border: {
+                color: 'rgba(255, 108, 33, 0.2)',
+            },
             beginAtZero: true,
         },
     },
@@ -73,16 +102,18 @@ async function fetchHistory(): Promise<void> {
         const response = await fetch(url);
         const json = await response.json();
         historyData.value = json.data ?? [];
+        const includeTime = currentRange.value === 'day';
         chartData.value = {
-            labels: historyData.value.map((d) => d.date),
+            labels: historyData.value.map((d) => formatChartDate(d.date, includeTime)),
             datasets: [
                 {
                     label: 'Install Count Over Time',
                     data: historyData.value.map((d) => d.count),
                     borderColor: 'rgb(255,108,33)',
                     backgroundColor: 'rgba(197,72,4,0.3)',
-                    pointRadius: 4,
-                    pointHoverRadius: 7,
+                    tension: 0.3,
+                    pointRadius: 3,
+                    pointHoverRadius: 6,
                     fill: true,
                 },
             ],
@@ -113,8 +144,13 @@ const ranges = [
 let intervalId: ReturnType<typeof setInterval> | null = null;
 const pageLoadTime = new Date();
 
+function onWindowResize(): void {
+    chartRef.value?.chart?.resize();
+}
+
 onMounted(() => {
     fetchHistory();
+    window.addEventListener('resize', onWindowResize);
 
     intervalId = setInterval(() => {
         const now = new Date();
@@ -126,6 +162,7 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
+    window.removeEventListener('resize', onWindowResize);
     if (intervalId !== null) {
         clearInterval(intervalId);
     }
@@ -135,85 +172,92 @@ onUnmounted(() => {
 <template>
     <Head :title="`${plugin.display || plugin.name} - Plugin Stats`" />
 
-    <div class="flex w-full flex-col sm:flex-row">
-        <!-- Left panel: plugin info -->
-        <div class="w-full p-4 sm:w-1/3">
-            <div class="rounded-lg border border-neutral-600 bg-neutral-700 shadow-sm">
-                <div class="flex flex-col space-y-2 p-6">
-                    <h3 class="text-4xl font-semibold tracking-tight whitespace-nowrap text-orange-600">
-                        {{ plugin.display || plugin.name }}
-                    </h3>
-                    <p class="text-sm text-gray-300">{{ plugin.description }}</p>
-                    <p class="break-words text-xs text-gray-400">{{ plugin.tags }}</p>
-                </div>
+    <div class="flex w-full flex-col gap-4 p-4">
+        <!-- Info card -->
+        <div class="rounded-lg bg-neutral-700 p-6 lg:w-1/2">
+            <h3 class="mb-1 text-2xl font-semibold tracking-tight text-orange-500">
+                {{ plugin.display || plugin.name }}
+            </h3>
+            <p class="mb-1 text-sm text-gray-300">{{ plugin.description }}</p>
+            <p class="mb-4 break-words text-xs text-gray-500">{{ plugin.tags }}</p>
 
-                <div class="space-y-4 p-6">
-                    <div class="flex flex-col space-y-0.5">
-                        <div>
-                            <div class="text-sm font-medium text-gray-500">Author</div>
-                            <div>{{ plugin.author }}</div>
-                        </div>
-                        <div>
-                            <div class="text-sm font-medium text-gray-500">Active Installs</div>
-                            <div>{{ formatNumber(plugin.current_installs) }}</div>
-                        </div>
-                        <div>
-                            <div class="text-sm font-medium text-gray-500">All-time High</div>
-                            <div>{{ formatNumber(plugin.all_time_high) }}</div>
-                        </div>
-                        <div>
-                            <div class="text-sm font-medium text-gray-500">Released On</div>
-                            <div>{{ formatDate(plugin.created_on) }}</div>
-                        </div>
-                        <div>
-                            <div class="text-sm font-medium text-gray-500">Last Update</div>
-                            <div>{{ formatDate(plugin.updated_on) }}</div>
-                        </div>
-                    </div>
+            <!-- Stats grid -->
+            <div class="mb-6 grid grid-cols-2 gap-4">
+                <div class="min-w-0">
+                    <div class="text-xs font-medium text-gray-500">Author</div>
+                    <div class="truncate text-sm text-gray-200" :title="plugin.author">{{ plugin.author }}</div>
                 </div>
+                <div class="min-w-0">
+                    <div class="text-xs font-medium text-gray-500">Last Update</div>
+                    <div class="truncate text-sm text-gray-200">{{ formatDate(plugin.updated_on) }}</div>
+                </div>
+                <div class="min-w-0">
+                    <div class="text-xs font-medium text-gray-500">All-time High</div>
+                    <div class="truncate text-sm text-gray-200">{{ formatNumber(plugin.all_time_high) }}</div>
+                </div>
+                <div class="min-w-0">
+                    <div class="text-xs font-medium text-gray-500">Released On</div>
+                    <div class="truncate text-sm text-gray-200">{{ formatDate(plugin.created_on) }}</div>
+                </div>
+                <div class="min-w-0">
+                    <div class="text-xs font-medium text-gray-500">Active Installs</div>
+                    <div class="truncate text-sm text-gray-200">{{ formatNumber(plugin.current_installs) }}</div>
+                </div>
+            </div>
 
-                <div class="flex justify-start gap-4 p-6">
-                    <a class="text-orange-500 hover:underline" target="_blank" :href="plugin.git_repo">GitHub</a>
-                    <a
-                        class="text-orange-500 hover:underline"
-                        target="_blank"
-                        :href="`https://runelite.net/plugin-hub/show/${plugin.name}`"
-                    >
-                        Runelite
-                    </a>
-                    <a
-                        v-if="plugin.support"
-                        class="text-orange-500 hover:underline"
-                        target="_blank"
-                        :href="plugin.support"
-                    >
-                        Support
-                    </a>
-                </div>
+            <!-- Links -->
+            <div class="flex flex-wrap gap-2">
+                <a
+                    class="rounded-full border border-orange-600 px-4 py-1 text-sm text-orange-400 transition hover:bg-orange-600 hover:text-white"
+                    target="_blank"
+                    :href="plugin.git_repo"
+                >
+                    GitHub
+                </a>
+                <a
+                    class="rounded-full border border-orange-600 px-4 py-1 text-sm text-orange-400 transition hover:bg-orange-600 hover:text-white"
+                    target="_blank"
+                    :href="`https://runelite.net/plugin-hub/show/${plugin.name}`"
+                >
+                    RuneLite
+                </a>
+                <a
+                    v-if="plugin.support"
+                    class="rounded-full border border-orange-600 px-4 py-1 text-sm text-orange-400 transition hover:bg-orange-600 hover:text-white"
+                    target="_blank"
+                    :href="plugin.support"
+                >
+                    Support
+                </a>
             </div>
         </div>
 
-        <!-- Right panel: chart -->
-        <div class="w-full p-4 sm:w-2/3">
-            <div class="flex flex-col">
-                <nav class="flex flex-wrap justify-between bg-orange-800 p-3 text-white">
-                    <button
-                        v-for="range in ranges"
-                        :key="range.value"
-                        class="block px-4 hover:underline"
-                        :class="{ 'font-bold underline': currentRange === range.value }"
-                        @click="setRange(range.value)"
-                    >
-                        {{ range.label }}
-                    </button>
-                </nav>
+        <!-- Chart card -->
+        <div class="rounded-lg bg-neutral-700 p-4">
+            <!-- Range buttons -->
+            <div class="mb-4 flex flex-wrap gap-2">
+                <button
+                    v-for="range in ranges"
+                    :key="range.value"
+                    class="rounded-full px-4 py-1 text-sm transition"
+                    :class="
+                        currentRange === range.value
+                            ? 'bg-orange-700 text-white'
+                            : 'bg-neutral-600 text-gray-300 hover:bg-orange-800 hover:text-white'
+                    "
+                    @click="setRange(range.value)"
+                >
+                    {{ range.label }}
+                </button>
+            </div>
 
-                <div class="w-full">
-                    <div v-if="isLoading" class="flex h-64 animate-pulse items-center justify-center rounded bg-neutral-700">
-                        <span class="text-gray-400">Loading chart...</span>
-                    </div>
-                    <Line v-else :data="chartData" :options="chartOptions" />
-                </div>
+            <!-- Chart -->
+            <div class="relative h-80">
+                <div
+                    v-if="isLoading"
+                    class="h-80 animate-pulse rounded-lg bg-neutral-600"
+                />
+                <Line ref="chartRef" v-else :data="chartData" :options="chartOptions" />
             </div>
         </div>
     </div>
