@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { random, show } from '@/actions/App/Http/Controllers/PluginController';
+import { show } from '@/actions/App/Http/Controllers/PluginController';
 import { scoreSearchResult } from '@/utils/formatting';
 import type { Plugin } from '@/types';
 import { router, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
-const page = usePage<{ plugins?: Plugin[] }>();
+const page = usePage<{ plugins?: Plugin[]; apiUrl: string }>();
 const plugins = computed(() => page.props.plugins ?? []);
 
 const searchInput = ref('');
@@ -22,8 +22,12 @@ const searchResults = computed(() => {
         .sort((a, b) => b.score - a.score);
 });
 
-function navigateRandom(): void {
-    router.visit(random.url());
+async function navigateRandom(): Promise<void> {
+    const response = await fetch(`${page.props.apiUrl}/plugins/random`);
+    const json = await response.json();
+    if (json.success && json.data?.name) {
+        router.visit(show.url(json.data.name));
+    }
 }
 
 function navigateToPlugin(name: string): void {

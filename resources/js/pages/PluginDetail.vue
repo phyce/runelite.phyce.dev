@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import PluginHistoryController from '@/actions/App/Http/Controllers/Api/PluginHistoryController';
 import { show } from '@/actions/App/Http/Controllers/PluginController';
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { Plugin, PluginHistoryData } from '@/types';
@@ -27,7 +26,7 @@ const props = defineProps<{
     plugin: Plugin;
 }>();
 
-const page = usePage();
+const page = usePage<{ apiUrl: string }>();
 const historyData = ref<PluginHistoryData[]>([]);
 const isLoading = ref(true);
 const chartRef = ref();
@@ -98,7 +97,8 @@ async function fetchHistory(): Promise<void> {
         if (currentRange.value && currentRange.value !== 'all') {
             params['range'] = currentRange.value;
         }
-        const url = PluginHistoryController.url(props.plugin.name, { query: params });
+        const queryString = new URLSearchParams(params).toString();
+        const url = `${page.props.apiUrl}/plugin/${props.plugin.name}/history${queryString ? '?' + queryString : ''}`;
         const response = await fetch(url);
         const json = await response.json();
         historyData.value = json.data ?? [];
@@ -178,29 +178,29 @@ onUnmounted(() => {
             <h3 class="mb-1 text-2xl font-semibold tracking-tight text-orange-500">
                 {{ plugin.display || plugin.name }}
             </h3>
-            <p class="mb-1 text-sm text-gray-300">{{ plugin.description }}</p>
-            <p class="mb-4 break-words text-xs text-gray-500">{{ plugin.tags }}</p>
+            <p class="mb-1 text-sm text-gray-200">{{ plugin.description }}</p>
+            <p class="mb-4 break-words text-xs text-gray-400">{{ plugin.tags }}</p>
 
             <!-- Stats grid -->
             <div class="mb-6 grid grid-cols-2 gap-4">
                 <div class="min-w-0">
-                    <div class="text-xs font-medium text-gray-500">Author</div>
+                    <div class="text-xs font-medium text-gray-400">Author</div>
                     <div class="truncate text-sm text-gray-200" :title="plugin.author">{{ plugin.author }}</div>
                 </div>
                 <div class="min-w-0">
-                    <div class="text-xs font-medium text-gray-500">Last Update</div>
+                    <div class="text-xs font-medium text-gray-400">Last Update</div>
                     <div class="truncate text-sm text-gray-200">{{ formatDate(plugin.updated_on) }}</div>
                 </div>
                 <div class="min-w-0">
-                    <div class="text-xs font-medium text-gray-500">All-time High</div>
+                    <div class="text-xs font-medium text-gray-400">All-time High</div>
                     <div class="truncate text-sm text-gray-200">{{ formatNumber(plugin.all_time_high) }}</div>
                 </div>
                 <div class="min-w-0">
-                    <div class="text-xs font-medium text-gray-500">Released On</div>
+                    <div class="text-xs font-medium text-gray-400">Released On</div>
                     <div class="truncate text-sm text-gray-200">{{ formatDate(plugin.created_on) }}</div>
                 </div>
                 <div class="min-w-0">
-                    <div class="text-xs font-medium text-gray-500">Active Installs</div>
+                    <div class="text-xs font-medium text-gray-400">Active Installs</div>
                     <div class="truncate text-sm text-gray-200">{{ formatNumber(plugin.current_installs) }}</div>
                 </div>
             </div>
