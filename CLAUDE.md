@@ -257,3 +257,10 @@ Wayfinder generates TypeScript functions for Laravel routes. Import from `@/acti
 - IMPORTANT: Activate `pest-testing` every time you're working with a Pest or testing-related task.
 
 </laravel-boost-guidelines>
+
+## Vue Component Styling
+
+- Always use BEM notation for CSS class names in Vue components.
+- Use `<style scoped>` blocks with `@apply` to apply Tailwind utility classes to BEM class names.
+- Every `<style scoped>` block that uses `@apply` MUST begin with `@reference "tailwindcss";` — without it, Tailwind v4 cannot resolve utility classes in component styles.
+- For custom CSS utilities defined in `app.css` (e.g. `scrollbar-custom`, `scrollbar-none`), you cannot use `@apply` — inline the raw CSS properties directly into the BEM class instead.

@@ -97,23 +97,23 @@ const columns: { field: SortField; label: string }[] = [
 <template>
     <Head title="Runelite Plugin Stats" />
 
-    <div ref="tableWrapper" class="scrollbar-none overflow-x-auto rounded-lg shadow-md">
-        <table class="w-full text-left text-sm text-gray-300">
-            <thead class="bg-orange-800 text-xs uppercase text-orange-100">
+    <div ref="tableWrapper" class="plugin-table__wrapper">
+        <table class="plugin-table">
+            <thead class="plugin-table__head">
                 <tr>
                     <th
                         v-for="col in columns"
                         :key="col.field"
                         scope="col"
-                        class="cursor-pointer px-3 py-3 hover:underline"
+                        class="plugin-table__head-cell plugin-table__head-cell--sortable"
                         @click="handleSort(col.field)"
                     >
                         <span>{{ col.label }}</span>
                         <span
-                            :class="sortField === col.field ? 'text-white' : 'text-orange-300/50'"
+                            :class="sortField === col.field ? 'plugin-table__head-sort--active' : 'plugin-table__head-sort--inactive'"
                         >{{ sortIndicator(col.field) }}</span>
                     </th>
-                    <th scope="col" class="px-3 py-3"></th>
+                    <th scope="col" class="plugin-table__head-cell"></th>
                 </tr>
             </thead>
             <tbody>
@@ -121,12 +121,12 @@ const columns: { field: SortField; label: string }[] = [
                     v-for="(plugin, index) in sortedPlugins"
                     :key="plugin.id"
                     :title="plugin.warning"
-                    class="border-b border-gray-700 text-gray-300 hover:bg-neutral-700"
-                    :class="index % 2 === 0 ? 'bg-neutral-800' : 'bg-neutral-700/30'"
+                    class="plugin-table__row"
+                    :class="index % 2 === 0 ? 'plugin-table__row--even' : 'plugin-table__row--odd'"
                 >
-                    <td class="px-3 py-2">
+                    <td class="plugin-table__cell">
                         <a
-                            class="text-orange-500 hover:underline"
+                            class="plugin-table__name-link"
                             :href="`https://runelite.net/plugin-hub/show/${plugin.name}`"
                             target="_blank"
                             rel="noopener noreferrer"
@@ -134,14 +134,14 @@ const columns: { field: SortField; label: string }[] = [
                             {{ plugin.display || plugin.name }}
                         </a>
                     </td>
-                    <td class="px-3 py-2">{{ plugin.current_installs.toLocaleString('en-US') }}</td>
-                    <td class="px-3 py-2">{{ plugin.all_time_high.toLocaleString('en-US') }}</td>
-                    <td class="px-3 py-2">{{ truncateString(plugin.description, 100) }}</td>
-                    <td class="px-3 py-2">{{ formatDate(plugin.updated_on) }}</td>
-                    <td class="px-3 py-2">
+                    <td class="plugin-table__cell">{{ plugin.current_installs.toLocaleString('en-US') }}</td>
+                    <td class="plugin-table__cell">{{ plugin.all_time_high.toLocaleString('en-US') }}</td>
+                    <td class="plugin-table__cell">{{ truncateString(plugin.description, 100) }}</td>
+                    <td class="plugin-table__cell">{{ formatDate(plugin.updated_on) }}</td>
+                    <td class="plugin-table__cell">
                         <a
                             :href="show.url(plugin.name)"
-                            class="whitespace-nowrap rounded bg-orange-700/30 px-2 py-0.5 text-orange-400 hover:bg-orange-700 hover:text-white"
+                            class="plugin-table__action-link"
                         >
                             View Stats
                         </a>
@@ -151,11 +151,94 @@ const columns: { field: SortField; label: string }[] = [
         </table>
     </div>
 
-    <!-- Sticky scrollbar pinned to bottom of viewport -->
     <div
         ref="stickyScrollbar"
-        class="scrollbar-custom sticky bottom-0 overflow-x-auto overflow-y-hidden"
+        class="plugin-table__scrollbar"
     >
-        <div :style="{ width: scrollWidth + 'px' }" class="h-px" />
+        <div :style="{ width: scrollWidth + 'px' }" class="plugin-table__scrollbar-spacer" />
     </div>
 </template>
+
+<style scoped>
+@reference "tailwindcss";
+
+.plugin-table__wrapper {
+    @apply overflow-x-auto rounded-lg shadow-md;
+    scrollbar-width: none;
+}
+
+.plugin-table__wrapper::-webkit-scrollbar {
+    display: none;
+}
+
+.plugin-table {
+    @apply w-full text-left text-sm text-gray-300;
+}
+
+.plugin-table__head {
+    @apply bg-orange-800 text-xs uppercase text-orange-100;
+}
+
+.plugin-table__head-cell {
+    @apply px-3 py-3;
+}
+
+.plugin-table__head-cell--sortable {
+    @apply cursor-pointer hover:underline;
+}
+
+.plugin-table__head-sort--active {
+    @apply text-white;
+}
+
+.plugin-table__head-sort--inactive {
+    @apply text-orange-300/50;
+}
+
+.plugin-table__row {
+    @apply border-b border-gray-700 text-gray-300 hover:bg-neutral-700;
+}
+
+.plugin-table__row--even {
+    @apply bg-neutral-800;
+}
+
+.plugin-table__row--odd {
+    @apply bg-neutral-700/30;
+}
+
+.plugin-table__cell {
+    @apply px-3 py-2;
+}
+
+.plugin-table__name-link {
+    @apply text-orange-500 hover:underline;
+}
+
+.plugin-table__action-link {
+    @apply whitespace-nowrap rounded bg-orange-700/30 px-2 py-0.5 text-orange-400 hover:bg-orange-700 hover:text-white;
+}
+
+.plugin-table__scrollbar {
+    @apply sticky bottom-0 overflow-x-auto overflow-y-hidden;
+    scrollbar-width: thin;
+    scrollbar-color: #c2410c #33363a;
+}
+
+.plugin-table__scrollbar::-webkit-scrollbar {
+    width: 8px;
+}
+
+.plugin-table__scrollbar::-webkit-scrollbar-track {
+    background: #33363a;
+}
+
+.plugin-table__scrollbar::-webkit-scrollbar-thumb {
+    background-color: #c2410c;
+    border-radius: 4px;
+}
+
+.plugin-table__scrollbar-spacer {
+    @apply h-px;
+}
+</style>

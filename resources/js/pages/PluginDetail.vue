@@ -172,50 +172,50 @@ onUnmounted(() => {
 <template>
     <Head :title="`${plugin.display || plugin.name} - Plugin Stats`" />
 
-    <div class="flex w-full flex-col gap-4 p-4">
+    <div class="plugin-detail">
         <!-- Info card -->
-        <div class="rounded-lg bg-neutral-700 p-6 lg:w-1/2">
-            <h3 class="mb-1 text-2xl font-semibold tracking-tight text-orange-500">
+        <div class="plugin-detail__info">
+            <h3 class="plugin-detail__title">
                 {{ plugin.display || plugin.name }}
             </h3>
-            <p class="mb-1 text-sm text-gray-200">{{ plugin.description }}</p>
-            <p class="mb-4 break-words text-xs text-gray-400">{{ plugin.tags }}</p>
+            <p class="plugin-detail__description">{{ plugin.description }}</p>
+            <p class="plugin-detail__tags">{{ plugin.tags }}</p>
 
             <!-- Stats grid -->
-            <div class="mb-6 grid grid-cols-2 gap-4">
-                <div class="min-w-0">
-                    <div class="text-xs font-medium text-gray-400">Author</div>
-                    <div class="truncate text-sm text-gray-200" :title="plugin.author">{{ plugin.author }}</div>
+            <div class="plugin-detail__stats">
+                <div class="plugin-detail__stat">
+                    <div class="plugin-detail__stat-label">Author</div>
+                    <div class="plugin-detail__stat-value" :title="plugin.author">{{ plugin.author }}</div>
                 </div>
-                <div class="min-w-0">
-                    <div class="text-xs font-medium text-gray-400">Last Update</div>
-                    <div class="truncate text-sm text-gray-200">{{ formatDate(plugin.updated_on) }}</div>
+                <div class="plugin-detail__stat">
+                    <div class="plugin-detail__stat-label">Last Update</div>
+                    <div class="plugin-detail__stat-value">{{ formatDate(plugin.updated_on) }}</div>
                 </div>
-                <div class="min-w-0">
-                    <div class="text-xs font-medium text-gray-400">All-time High</div>
-                    <div class="truncate text-sm text-gray-200">{{ formatNumber(plugin.all_time_high) }}</div>
+                <div class="plugin-detail__stat">
+                    <div class="plugin-detail__stat-label">All-time High</div>
+                    <div class="plugin-detail__stat-value">{{ formatNumber(plugin.all_time_high) }}</div>
                 </div>
-                <div class="min-w-0">
-                    <div class="text-xs font-medium text-gray-400">Released On</div>
-                    <div class="truncate text-sm text-gray-200">{{ formatDate(plugin.created_on) }}</div>
+                <div class="plugin-detail__stat">
+                    <div class="plugin-detail__stat-label">Released On</div>
+                    <div class="plugin-detail__stat-value">{{ formatDate(plugin.created_on) }}</div>
                 </div>
-                <div class="min-w-0">
-                    <div class="text-xs font-medium text-gray-400">Active Installs</div>
-                    <div class="truncate text-sm text-gray-200">{{ formatNumber(plugin.current_installs) }}</div>
+                <div class="plugin-detail__stat">
+                    <div class="plugin-detail__stat-label">Active Installs</div>
+                    <div class="plugin-detail__stat-value">{{ formatNumber(plugin.current_installs) }}</div>
                 </div>
             </div>
 
             <!-- Links -->
-            <div class="flex flex-wrap gap-2">
+            <div class="plugin-detail__links">
                 <a
-                    class="rounded-full border border-orange-600 px-4 py-1 text-sm text-orange-400 transition hover:bg-orange-600 hover:text-white"
+                    class="plugin-detail__link"
                     target="_blank"
                     :href="plugin.git_repo"
                 >
                     GitHub
                 </a>
                 <a
-                    class="rounded-full border border-orange-600 px-4 py-1 text-sm text-orange-400 transition hover:bg-orange-600 hover:text-white"
+                    class="plugin-detail__link"
                     target="_blank"
                     :href="`https://runelite.net/plugin-hub/show/${plugin.name}`"
                 >
@@ -223,7 +223,7 @@ onUnmounted(() => {
                 </a>
                 <a
                     v-if="plugin.support"
-                    class="rounded-full border border-orange-600 px-4 py-1 text-sm text-orange-400 transition hover:bg-orange-600 hover:text-white"
+                    class="plugin-detail__link"
                     target="_blank"
                     :href="plugin.support"
                 >
@@ -233,18 +233,14 @@ onUnmounted(() => {
         </div>
 
         <!-- Chart card -->
-        <div class="rounded-lg bg-neutral-700 p-4">
+        <div class="plugin-detail__chart-card">
             <!-- Range buttons -->
-            <div class="mb-4 flex flex-wrap gap-2">
+            <div class="plugin-detail__ranges">
                 <button
                     v-for="range in ranges"
                     :key="range.value"
-                    class="rounded-full px-4 py-1 text-sm transition"
-                    :class="
-                        currentRange === range.value
-                            ? 'bg-orange-700 text-white'
-                            : 'bg-neutral-600 text-gray-300 hover:bg-orange-800 hover:text-white'
-                    "
+                    class="plugin-detail__range-btn"
+                    :class="currentRange === range.value ? 'plugin-detail__range-btn--active' : 'plugin-detail__range-btn--inactive'"
                     @click="setRange(range.value)"
                 >
                     {{ range.label }}
@@ -252,13 +248,89 @@ onUnmounted(() => {
             </div>
 
             <!-- Chart -->
-            <div class="relative h-80">
+            <div class="plugin-detail__chart-area">
                 <div
                     v-if="isLoading"
-                    class="h-80 animate-pulse rounded-lg bg-neutral-600"
+                    class="plugin-detail__chart-skeleton"
                 />
                 <Line ref="chartRef" v-else :data="chartData" :options="chartOptions" />
             </div>
         </div>
     </div>
 </template>
+
+<style scoped>
+@reference "tailwindcss";
+
+.plugin-detail {
+    @apply flex w-full flex-col gap-4 p-4;
+}
+
+.plugin-detail__info {
+    @apply rounded-lg bg-neutral-700 p-6 lg:w-1/2;
+}
+
+.plugin-detail__title {
+    @apply mb-1 text-2xl font-semibold tracking-tight text-orange-500;
+}
+
+.plugin-detail__description {
+    @apply mb-1 text-sm text-gray-200;
+}
+
+.plugin-detail__tags {
+    @apply mb-4 break-words text-xs text-gray-400;
+}
+
+.plugin-detail__stats {
+    @apply mb-6 grid grid-cols-2 gap-4;
+}
+
+.plugin-detail__stat {
+    @apply min-w-0;
+}
+
+.plugin-detail__stat-label {
+    @apply text-xs font-medium text-gray-400;
+}
+
+.plugin-detail__stat-value {
+    @apply truncate text-sm text-gray-200;
+}
+
+.plugin-detail__links {
+    @apply flex flex-wrap gap-2;
+}
+
+.plugin-detail__link {
+    @apply rounded-full border border-orange-600 px-4 py-1 text-sm text-orange-400 transition hover:bg-orange-600 hover:text-white;
+}
+
+.plugin-detail__chart-card {
+    @apply rounded-lg bg-neutral-700 p-4;
+}
+
+.plugin-detail__ranges {
+    @apply mb-4 flex flex-wrap gap-2;
+}
+
+.plugin-detail__range-btn {
+    @apply rounded-full px-4 py-1 text-sm transition;
+}
+
+.plugin-detail__range-btn--active {
+    @apply bg-orange-700 text-white;
+}
+
+.plugin-detail__range-btn--inactive {
+    @apply bg-neutral-600 text-gray-300 hover:bg-orange-800 hover:text-white;
+}
+
+.plugin-detail__chart-area {
+    @apply relative h-80;
+}
+
+.plugin-detail__chart-skeleton {
+    @apply h-80 animate-pulse rounded-lg bg-neutral-600;
+}
+</style>
