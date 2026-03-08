@@ -38,7 +38,7 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'name' => config('app.name'),
-            'apiUrl' => rtrim(config('services.runelite_api.url'), '/'),
+            'apiUrl' => rtrim(config('services.runelite_api.client_url'), '/'),
         ];
     }
 }

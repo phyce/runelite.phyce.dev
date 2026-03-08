@@ -37,6 +37,7 @@ return [
 
     'runelite_api' => [
         'url' => env('RUNELITE_API_URL', 'https://api-runelite.phyce.dev'),
+        'client_url' => env('RUNELITE_CLIENT_API_URL', 'https://api-runelite.phyce.dev'),
     ],
 
 ];
