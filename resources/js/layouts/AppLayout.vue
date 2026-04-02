@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import AppFooter from '@/components/AppFooter.vue';
 import AppHeader from '@/components/AppHeader.vue';
+import AppNav from '@/components/AppNav.vue';
 </script>
 
 <template>
     <div class="app-layout">
         <AppHeader />
+        <AppNav />
         <main class="app-layout__main">
             <slot />
         </main>
@@ -21,6 +23,6 @@ import AppHeader from '@/components/AppHeader.vue';
 }
 
 .app-layout__main {
-    @apply flex-1 p-4;
+    @apply flex-1;
 }
 </style>

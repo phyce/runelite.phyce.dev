@@ -3,7 +3,7 @@ import { show } from '@/actions/App/Http/Controllers/PluginController';
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { Plugin } from '@/types';
 import { formatDate, truncateString } from '@/utils/formatting';
-import { Head } from '@inertiajs/vue3';
+import { Head, usePage } from '@inertiajs/vue3';
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 
 defineOptions({ layout: AppLayout });
@@ -12,26 +12,27 @@ const props = defineProps<{
     plugins: Plugin[];
 }>();
 
+const page = usePage<{ appUrl: string }>();
+const appUrl = page.props.appUrl;
+
 type SortField = keyof Plugin;
 type SortDirection = 'asc' | 'desc';
 
-const sortField = ref<SortField>('name');
-const sortDirection = ref<SortDirection>('asc');
+const sortField = ref<SortField>('current_installs');
+const sortDirection = ref<SortDirection>('desc');
 
 function handleSort(field: SortField): void {
     if (sortField.value === field) {
         sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc';
     } else {
         sortField.value = field;
-        sortDirection.value = 'asc';
+        sortDirection.value = field === 'name' ? 'asc' : 'desc';
     }
 }
 
 function sortIndicator(field: SortField): string {
-    if (sortField.value !== field) {
-        return ' ↕';
-    }
-    return sortDirection.value === 'asc' ? ' ↑' : ' ↓';
+    if (sortField.value !== field) return '↕';
+    return sortDirection.value === 'asc' ? '↑' : '↓';
 }
 
 const sortedPlugins = computed(() => {
@@ -86,16 +87,22 @@ onUnmounted(() => {
 });
 
 const columns: { field: SortField; label: string }[] = [
-    { field: 'name', label: 'Name' },
-    { field: 'current_installs', label: 'Current Installs' },
+    { field: 'name', label: 'Plugin' },
+    { field: 'current_installs', label: 'Installs' },
     { field: 'all_time_high', label: 'All-Time High' },
     { field: 'description', label: 'Description' },
-    { field: 'updated_on', label: 'Updated On' },
+    { field: 'updated_on', label: 'Updated' },
 ];
 </script>
 
 <template>
-    <Head title="Runelite Plugin Stats" />
+    <Head title="RuneLite Plugin Stats">
+        <meta name="description" content="Browse and compare install statistics for all RuneLite plugins." />
+        <meta property="og:title" content="RuneLite Plugin Stats" />
+        <meta property="og:description" content="Browse and compare install statistics for all RuneLite plugins." />
+        <meta property="og:type" content="website" />
+        <link rel="canonical" :href="appUrl" />
+    </Head>
 
     <div ref="tableWrapper" class="plugin-table__wrapper">
         <table class="plugin-table">
@@ -108,10 +115,8 @@ const columns: { field: SortField; label: string }[] = [
                         class="plugin-table__head-cell plugin-table__head-cell--sortable"
                         @click="handleSort(col.field)"
                     >
-                        <span>{{ col.label }}</span>
-                        <span
-                            :class="sortField === col.field ? 'plugin-table__head-sort--active' : 'plugin-table__head-sort--inactive'"
-                        >{{ sortIndicator(col.field) }}</span>
+                        {{ col.label }}
+                        <span :class="sortField === col.field ? 'plugin-table__sort--active' : 'plugin-table__sort--inactive'">{{ sortIndicator(col.field) }}</span>
                     </th>
                     <th scope="col" class="plugin-table__head-cell"></th>
                 </tr>
@@ -130,31 +135,22 @@ const columns: { field: SortField; label: string }[] = [
                             :href="`https://runelite.net/plugin-hub/show/${plugin.name}`"
                             target="_blank"
                             rel="noopener noreferrer"
-                        >
-                            {{ plugin.display || plugin.name }}
-                        </a>
+                        >{{ plugin.display || plugin.name }}</a>
+                        <span v-if="plugin.author" class="plugin-table__author">by {{ plugin.author }}</span>
                     </td>
-                    <td class="plugin-table__cell">{{ plugin.current_installs.toLocaleString('en-US') }}</td>
-                    <td class="plugin-table__cell">{{ plugin.all_time_high.toLocaleString('en-US') }}</td>
-                    <td class="plugin-table__cell">{{ truncateString(plugin.description, 100) }}</td>
-                    <td class="plugin-table__cell">{{ formatDate(plugin.updated_on) }}</td>
-                    <td class="plugin-table__cell">
-                        <a
-                            :href="show.url(plugin.name)"
-                            class="plugin-table__action-link"
-                        >
-                            View Stats
-                        </a>
+                    <td class="plugin-table__cell plugin-table__cell--num">{{ plugin.current_installs.toLocaleString('en-US') }}</td>
+                    <td class="plugin-table__cell plugin-table__cell--num plugin-table__cell--secondary">{{ plugin.all_time_high.toLocaleString('en-US') }}</td>
+                    <td class="plugin-table__cell plugin-table__cell--desc">{{ truncateString(plugin.description, 100) }}</td>
+                    <td class="plugin-table__cell plugin-table__cell--secondary plugin-table__cell--date">{{ formatDate(plugin.updated_on) }}</td>
+                    <td class="plugin-table__cell plugin-table__cell--action">
+                        <a :href="show.url(plugin.name)" class="plugin-table__stats-link">Stats</a>
                     </td>
                 </tr>
             </tbody>
         </table>
     </div>
 
-    <div
-        ref="stickyScrollbar"
-        class="plugin-table__scrollbar"
-    >
+    <div ref="stickyScrollbar" class="plugin-table__scrollbar">
         <div :style="{ width: scrollWidth + 'px' }" class="plugin-table__scrollbar-spacer" />
     </div>
 </template>
@@ -163,7 +159,7 @@ const columns: { field: SortField; label: string }[] = [
 @reference "tailwindcss";
 
 .plugin-table__wrapper {
-    @apply overflow-x-auto rounded-lg shadow-md;
+    @apply overflow-x-auto border-y border-neutral-700 sm:rounded-xl sm:border;
     scrollbar-width: none;
 }
 
@@ -172,69 +168,116 @@ const columns: { field: SortField; label: string }[] = [
 }
 
 .plugin-table {
-    @apply w-full text-left text-sm text-gray-300;
+    @apply w-full text-left text-sm;
 }
 
 .plugin-table__head {
-    @apply bg-orange-800 text-xs uppercase text-orange-100;
+    background: #0d0d0d;
+    border-bottom: 1px solid #2a2a2a;
 }
 
 .plugin-table__head-cell {
-    @apply px-3 py-3;
+    @apply px-4 py-3 text-xs font-medium uppercase tracking-wider text-gray-500;
+    white-space: nowrap;
 }
 
 .plugin-table__head-cell--sortable {
-    @apply cursor-pointer hover:underline;
+    @apply cursor-pointer select-none;
 }
 
-.plugin-table__head-sort--active {
-    @apply text-white;
+.plugin-table__head-cell--sortable:hover {
+    color: #ff6c21;
 }
 
-.plugin-table__head-sort--inactive {
-    @apply text-orange-300/50;
+.plugin-table__sort--active {
+    color: #ff6c21;
+}
+
+.plugin-table__sort--inactive {
+    @apply text-gray-700;
 }
 
 .plugin-table__row {
-    @apply border-b border-gray-700 text-gray-300 hover:bg-neutral-700;
+    @apply transition-colors duration-75;
+    border-bottom: 1px solid #1e1e1e;
 }
 
 .plugin-table__row--even {
-    @apply bg-neutral-800;
+    @apply bg-neutral-900;
 }
 
 .plugin-table__row--odd {
-    @apply bg-neutral-700/30;
+    background: #222222;
+}
+
+.plugin-table__row:hover {
+    background: #3a2010;
 }
 
 .plugin-table__cell {
-    @apply px-3 py-2;
+    @apply px-4 py-2.5 text-gray-300;
+}
+
+.plugin-table__cell--num {
+    @apply tabular-nums font-medium text-gray-200;
+    white-space: nowrap;
+}
+
+.plugin-table__cell--secondary {
+    @apply text-gray-400;
+}
+
+.plugin-table__cell--desc {
+    @apply text-gray-400;
+    max-width: 28rem;
+}
+
+.plugin-table__cell--date {
+    white-space: nowrap;
+}
+
+.plugin-table__cell--action {
+    @apply text-right;
+    white-space: nowrap;
 }
 
 .plugin-table__name-link {
-    @apply text-orange-500 hover:underline;
+    @apply font-medium text-orange-400 transition-colors duration-100 hover:text-orange-300;
 }
 
-.plugin-table__action-link {
-    @apply whitespace-nowrap rounded bg-orange-700/30 px-2 py-0.5 text-orange-400 hover:bg-orange-700 hover:text-white;
+.plugin-table__author {
+    @apply ml-1.5 text-xs text-gray-500;
+}
+
+.plugin-table__stats-link {
+    @apply rounded px-2 py-1 text-xs font-medium transition-colors duration-100;
+    background: rgba(197, 71, 4, 0.2);
+    border: 1px solid rgba(255, 108, 33, 0.45);
+    color: #fb923c;
+}
+
+.plugin-table__stats-link:hover {
+    background: #c54704;
+    border-color: #c54704;
+    color: #fff;
 }
 
 .plugin-table__scrollbar {
     @apply sticky bottom-0 overflow-x-auto overflow-y-hidden;
     scrollbar-width: thin;
-    scrollbar-color: #c2410c #33363a;
+    scrollbar-color: #c54704 #1a1a1a;
 }
 
 .plugin-table__scrollbar::-webkit-scrollbar {
-    width: 8px;
+    height: 6px;
 }
 
 .plugin-table__scrollbar::-webkit-scrollbar-track {
-    background: #33363a;
+    background: #1a1a1a;
 }
 
 .plugin-table__scrollbar::-webkit-scrollbar-thumb {
-    background-color: #c2410c;
+    background-color: #c54704;
     border-radius: 4px;
 }
 

@@ -26,7 +26,8 @@ const props = defineProps<{
     plugin: Plugin;
 }>();
 
-const page = usePage<{ apiUrl: string }>();
+const page = usePage<{ apiUrl: string; appUrl: string }>();
+const appUrl = page.props.appUrl;
 const historyData = ref<PluginHistoryData[]>([]);
 const isLoading = ref(true);
 const chartRef = ref();
@@ -170,7 +171,13 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <Head :title="`${plugin.display || plugin.name} - Plugin Stats`" />
+    <Head :title="`${plugin.display || plugin.name} - RuneLite Plugin Stats`">
+        <meta name="description" :content="plugin.description" />
+        <meta property="og:title" :content="`${plugin.display || plugin.name} - RuneLite Plugin Stats`" />
+        <meta property="og:description" :content="plugin.description" />
+        <meta property="og:type" content="website" />
+        <link rel="canonical" :href="`${appUrl}${show.url(plugin.name)}`" />
+    </Head>
 
     <div class="plugin-detail">
         <!-- Info card -->
@@ -263,15 +270,24 @@ onUnmounted(() => {
 @reference "tailwindcss";
 
 .plugin-detail {
-    @apply flex w-full flex-col gap-4 p-4;
+    @apply flex w-full flex-col gap-3 py-4 sm:px-4;
 }
 
 .plugin-detail__info {
-    @apply rounded-lg bg-neutral-700 p-6 lg:w-1/2;
+    @apply p-4 sm:rounded-lg sm:p-6 lg:w-1/2;
+    background: #141414;
+    border-top: 1px solid #2a2a2a;
+    border-bottom: 1px solid #2a2a2a;
+}
+
+@media (min-width: 640px) {
+    .plugin-detail__info {
+        border: 1px solid #2a2a2a;
+    }
 }
 
 .plugin-detail__title {
-    @apply mb-1 text-2xl font-semibold tracking-tight text-orange-500;
+    @apply mb-1 text-xl font-semibold tracking-tight text-orange-500 sm:text-2xl;
 }
 
 .plugin-detail__description {
@@ -279,11 +295,11 @@ onUnmounted(() => {
 }
 
 .plugin-detail__tags {
-    @apply mb-4 break-words text-xs text-gray-400;
+    @apply mb-3 break-words text-xs text-gray-400;
 }
 
 .plugin-detail__stats {
-    @apply mb-6 grid grid-cols-2 gap-4;
+    @apply mb-4 grid grid-cols-2 gap-3 sm:gap-4;
 }
 
 .plugin-detail__stat {
@@ -291,11 +307,11 @@ onUnmounted(() => {
 }
 
 .plugin-detail__stat-label {
-    @apply text-xs font-medium text-gray-400;
+    @apply text-xs font-medium text-gray-300;
 }
 
 .plugin-detail__stat-value {
-    @apply truncate text-sm text-gray-200;
+    @apply truncate text-sm text-gray-100;
 }
 
 .plugin-detail__links {
@@ -307,11 +323,20 @@ onUnmounted(() => {
 }
 
 .plugin-detail__chart-card {
-    @apply rounded-lg bg-neutral-700 p-4;
+    @apply p-3 sm:rounded-lg sm:p-4;
+    background: #141414;
+    border-top: 1px solid #2a2a2a;
+    border-bottom: 1px solid #2a2a2a;
+}
+
+@media (min-width: 640px) {
+    .plugin-detail__chart-card {
+        border: 1px solid #2a2a2a;
+    }
 }
 
 .plugin-detail__ranges {
-    @apply mb-4 flex flex-wrap gap-2;
+    @apply mb-3 flex flex-wrap gap-1.5 sm:gap-2;
 }
 
 .plugin-detail__range-btn {
@@ -319,18 +344,27 @@ onUnmounted(() => {
 }
 
 .plugin-detail__range-btn--active {
-    @apply bg-orange-700 text-white;
+    @apply text-white;
+    background: #c54704;
 }
 
 .plugin-detail__range-btn--inactive {
-    @apply bg-neutral-600 text-gray-300 hover:bg-orange-800 hover:text-white;
+    @apply bg-neutral-800 text-gray-400;
+    border: 1px solid #333;
+}
+
+.plugin-detail__range-btn--inactive:hover {
+    background: #3a2010;
+    color: #ff6c21;
+    border-color: rgba(255, 108, 33, 0.3);
 }
 
 .plugin-detail__chart-area {
-    @apply relative h-80;
+    @apply relative h-56 sm:h-80;
 }
 
 .plugin-detail__chart-skeleton {
-    @apply h-80 animate-pulse rounded-lg bg-neutral-600;
+    @apply h-56 animate-pulse rounded-lg sm:h-80;
+    background: #222222;
 }
 </style>

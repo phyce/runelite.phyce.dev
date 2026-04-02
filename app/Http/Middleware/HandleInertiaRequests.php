@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\RuneliteApiService;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -15,6 +16,8 @@ class HandleInertiaRequests extends Middleware
      * @var string
      */
     protected $rootView = 'app';
+
+    public function __construct(private RuneliteApiService $runeliteApi) {}
 
     /**
      * Determines the current asset version.
@@ -39,6 +42,8 @@ class HandleInertiaRequests extends Middleware
             ...parent::share($request),
             'name' => config('app.name'),
             'apiUrl' => rtrim(config('services.runelite_api.client_url'), '/'),
+            'appUrl' => config('app.url'),
+            'plugins' => $this->runeliteApi->getPlugins([]),
         ];
     }
 }

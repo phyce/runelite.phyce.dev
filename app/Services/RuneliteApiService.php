@@ -38,6 +38,38 @@ class RuneliteApiService
         });
     }
 
+    /** @return array<mixed> */
+    public function getTopHundred(): array
+    {
+        return $this->cached('plugins/top', [], 300, function () {
+            return $this->fetch('plugins/top', []) ?? [];
+        });
+    }
+
+    /** @return array<mixed> */
+    public function getTopAbsolute(string $period): array
+    {
+        return $this->cached('plugins/top/absolute', ['period' => $period], 300, function () use ($period) {
+            return $this->fetch('plugins/top/absolute', ['period' => $period]) ?? [];
+        });
+    }
+
+    /** @return array<mixed> */
+    public function getTopRelative(string $period): array
+    {
+        return $this->cached('plugins/top/relative', ['period' => $period], 300, function () use ($period) {
+            return $this->fetch('plugins/top/relative', ['period' => $period]) ?? [];
+        });
+    }
+
+    /** @return array<mixed> */
+    public function getGreatest(): array
+    {
+        return $this->cached('plugins/greatest', [], 86400, function () {
+            return $this->fetch('plugins/greatest', []) ?? [];
+        });
+    }
+
     /** @return array<mixed>|null */
     public function getRandomPlugin(): ?array
     {

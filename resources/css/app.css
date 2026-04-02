@@ -33,8 +33,13 @@
     src: url('/fonts/poppins-700.woff2') format('woff2');
 }
 
+:root {
+    color-scheme: dark;
+}
+
 body {
     background-color: #404040;
+    color-scheme: dark;
     scrollbar-width: thin;
     scrollbar-color: #c2410c #33363a;
 }

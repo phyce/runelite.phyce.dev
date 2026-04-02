@@ -8,6 +8,11 @@
 
         <link rel="icon" href="/img/favicon.png" sizes="any">
 
+        {!! SEOMeta::generate(false) !!}
+        {!! OpenGraph::generate() !!}
+        {!! Twitter::generate() !!}
+        {!! JsonLd::generate() !!}
+
         @vite(['resources/js/app.ts', "resources/js/pages/{$page['component']}.vue"])
         @inertiaHead
     </head>
