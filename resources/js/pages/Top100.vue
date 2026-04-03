@@ -36,7 +36,7 @@ function pluginDisplayName(entry: RankedPlugin): string {
 </script>
 
 <template>
-    <Head title="Best RuneLite Plugins - Top 100 Ranked | RuneLite Stats" />
+    <Head title="Top 100 RuneLite Plugins | RuneLite Plugin Stats" />
 
     <div class="top100">
         <div class="top100__header">
@@ -363,7 +363,7 @@ function pluginDisplayName(entry: RankedPlugin): string {
 }
 
 .top100__list-rank {
-    @apply w-8 shrink-0 text-right text-sm font-medium tabular-nums text-gray-400;
+    @apply shrink-0 text-right text-sm font-medium tabular-nums text-gray-400;
 }
 
 .top100__list-plugin {

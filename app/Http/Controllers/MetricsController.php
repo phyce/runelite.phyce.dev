@@ -20,21 +20,23 @@ class MetricsController extends Controller
 
         $topPlugin = $data['rankings'][0]['plugin']['display'] ?? $data['rankings'][0]['plugin']['name'] ?? null;
         $description = $topPlugin
-            ? "Top 100 RuneLite plugins ranked by installs, growth, retention & momentum. Currently #1: {$topPlugin}. Updated daily."
-            : 'Discover the top 100 RuneLite plugins ranked by installs, 30-day growth, retention, and 7-day momentum. Updated daily.';
+            ? "The top 100 RuneLite plugins ranked by popularity, growth, and player retention. Currently #1: {$topPlugin}. Updated daily."
+            : 'The top 100 RuneLite plugins ranked by popularity, growth, and player retention. Updated daily.';
 
-        SEOTools::setTitle('Best RuneLite Plugins - Top 100 Ranked | RuneLite Stats');
+        SEOTools::setTitle('Top 100 RuneLite Plugins | RuneLite Plugin Stats');
         SEOTools::setDescription($description);
         SEOTools::opengraph()->setUrl(route('top'));
         SEOTools::opengraph()->addProperty('type', 'website');
-        SEOTools::opengraph()->addProperty('title', 'Best RuneLite Plugins — Top 100 Ranked');
+        SEOTools::opengraph()->addProperty('title', 'Top 100 RuneLite Plugins | RuneLite Plugin Stats');
         SEOTools::opengraph()->addProperty('description', $description);
         SEOTools::opengraph()->addProperty('site_name', config('app.name'));
+        SEOTools::opengraph()->addImage(asset('img/og-static.png'));
         SEOMeta::setCanonical(route('top'));
         SEOMeta::addMeta('robots', 'index, follow');
         TwitterCard::setTitle('Best RuneLite Plugins — Top 100 Ranked');
         TwitterCard::setDescription($description);
-        TwitterCard::setType('summary');
+        TwitterCard::setType('summary_large_image');
+        TwitterCard::setImage(asset('img/og-static.png'));
 
         $listElements = collect($data['rankings'] ?? [])
             ->take(100)
@@ -73,11 +75,18 @@ class MetricsController extends Controller
         $period = $request->query('period', '30d');
         $data = $this->runeliteApi->getTopAbsolute($period);
 
-        SEOTools::setTitle('Most Popular - RuneLite Plugin Stats');
-        SEOTools::setDescription('RuneLite plugins ranked by absolute install count growth over a selected time window.');
+        SEOTools::setTitle('Most Popular RuneLite Plugins | RuneLite Plugin Stats');
+        SEOTools::setDescription('See which RuneLite plugins are gaining the most new installs. Filter by 24 hours, 7 days, 30 days, 6 months, or 1 year.');
         SEOTools::opengraph()->setUrl(route('top.absolute'));
         SEOTools::opengraph()->addProperty('type', 'website');
+        SEOTools::opengraph()->addProperty('title', 'Most Popular RuneLite Plugins | RuneLite Plugin Stats');
+        SEOTools::opengraph()->addProperty('description', 'See which RuneLite plugins are gaining the most new installs.');
+        SEOTools::opengraph()->addProperty('site_name', config('app.name'));
+        SEOTools::opengraph()->addImage(asset('img/og-static.png'));
         SEOMeta::setCanonical(route('top.absolute'));
+        SEOMeta::addMeta('robots', 'index, follow');
+        TwitterCard::setType('summary_large_image');
+        TwitterCard::setImage(asset('img/og-static.png'));
 
         return inertia('TopAbsolute', [
             'entries' => $data,
@@ -90,11 +99,18 @@ class MetricsController extends Controller
         $period = $request->query('period', '30d');
         $data = $this->runeliteApi->getTopRelative($period);
 
-        SEOTools::setTitle('Fastest Growing - RuneLite Plugin Stats');
-        SEOTools::setDescription('RuneLite plugins ranked by percentage install count growth over a selected time window.');
+        SEOTools::setTitle('Fastest Growing RuneLite Plugins | RuneLite Plugin Stats');
+        SEOTools::setDescription('See which RuneLite plugins are growing the fastest. Filter by 24 hours, 7 days, 30 days, 6 months, or 1 year.');
         SEOTools::opengraph()->setUrl(route('top.relative'));
         SEOTools::opengraph()->addProperty('type', 'website');
+        SEOTools::opengraph()->addProperty('title', 'Fastest Growing RuneLite Plugins | RuneLite Plugin Stats');
+        SEOTools::opengraph()->addProperty('description', 'See which RuneLite plugins are growing the fastest.');
+        SEOTools::opengraph()->addProperty('site_name', config('app.name'));
+        SEOTools::opengraph()->addImage(asset('img/og-static.png'));
         SEOMeta::setCanonical(route('top.relative'));
+        SEOMeta::addMeta('robots', 'index, follow');
+        TwitterCard::setType('summary_large_image');
+        TwitterCard::setImage(asset('img/og-static.png'));
 
         return inertia('TopRelative', [
             'entries' => $data,

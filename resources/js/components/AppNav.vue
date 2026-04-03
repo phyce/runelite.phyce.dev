@@ -41,7 +41,7 @@ function isActive(href: string, exact: boolean): boolean {
 @reference "tailwindcss";
 
 .app-nav {
-    @apply border-b border-neutral-700 bg-neutral-900 px-4;
+    @apply hidden border-b border-neutral-700 bg-neutral-900 px-4 sm:block;
 }
 
 .app-nav__inner {

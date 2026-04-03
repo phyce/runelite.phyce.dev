@@ -81,7 +81,7 @@ const sortedEntries = computed(() => {
 </script>
 
 <template>
-    <Head title="Fastest Growing - RuneLite Plugin Stats" />
+    <Head title="Fastest Growing | RuneLite Plugin Stats" />
 
     <div class="top-relative">
         <div class="top-relative__top-bar">
@@ -130,18 +130,18 @@ const sortedEntries = computed(() => {
                         <th
                             scope="col"
                             class="top-relative__head-cell top-relative__head-cell--num top-relative__head-cell--sortable"
-                            @click="handleSort('absolute_growth')"
-                        >
-                            Installs
-                            <span :class="sortField === 'absolute_growth' ? 'top-relative__sort--active' : 'top-relative__sort--inactive'">{{ sortIndicator('absolute_growth') }}</span>
-                        </th>
-                        <th
-                            scope="col"
-                            class="top-relative__head-cell top-relative__head-cell--num top-relative__head-cell--sortable"
                             @click="handleSort('pct_growth')"
                         >
                             % Change
                             <span :class="sortField === 'pct_growth' ? 'top-relative__sort--active' : 'top-relative__sort--inactive'">{{ sortIndicator('pct_growth') }}</span>
+                        </th>
+                        <th
+                            scope="col"
+                            class="top-relative__head-cell top-relative__head-cell--num top-relative__head-cell--sortable"
+                            @click="handleSort('absolute_growth')"
+                        >
+                            Installs
+                            <span :class="sortField === 'absolute_growth' ? 'top-relative__sort--active' : 'top-relative__sort--inactive'">{{ sortIndicator('absolute_growth') }}</span>
                         </th>
                         <th scope="col" class="top-relative__head-cell"></th>
                     </tr>
@@ -165,14 +165,14 @@ const sortedEntries = computed(() => {
                                 <span v-if="entry.plugin.author" class="top-relative__plugin-author">by {{ entry.plugin.author }}</span>
                             </div>
                         </td>
+                        <td class="top-relative__cell top-relative__cell--pct">
+                            {{ hasWindowBaseline(entry) ? (entry.pct_growth >= 0 ? '+' : '') + entry.pct_growth.toFixed(1) + '%' : '—' }}
+                        </td>
                         <td class="top-relative__cell top-relative__cell--installs">
                             <div class="top-relative__installs">
                                 <span class="top-relative__installs-total">{{ formatNumber(entry.plugin.current_installs) }}</span>
                                 <span class="top-relative__installs-gain">+{{ formatNumber(entry.absolute_growth) }}</span>
                             </div>
-                        </td>
-                        <td class="top-relative__cell top-relative__cell--pct">
-                            {{ hasWindowBaseline(entry) ? (entry.pct_growth >= 0 ? '+' : '') + entry.pct_growth.toFixed(1) + '%' : '—' }}
                         </td>
                         <td class="top-relative__cell top-relative__cell--action">
                             <a :href="show.url(entry.plugin.name)" class="top-relative__stats-link">Stats</a>
@@ -188,35 +188,35 @@ const sortedEntries = computed(() => {
 @reference "tailwindcss";
 
 .top-relative {
-    @apply mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 pt-4;
+    @apply mx-auto flex w-full max-w-5xl flex-col gap-3 px-4 pt-2 sm:gap-6 sm:pt-4;
 }
 
 /* ── Top bar ── */
 
 .top-relative__top-bar {
-    @apply flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between;
+    @apply flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3;
 }
 
 .top-relative__header {
-    @apply flex flex-col gap-1;
+    @apply flex flex-col gap-0.5;
 }
 
 .top-relative__title {
-    @apply text-2xl font-bold tracking-tight text-orange-500;
+    @apply text-xl font-bold tracking-tight text-orange-500 sm:text-2xl;
 }
 
 .top-relative__subtitle {
-    @apply text-sm text-gray-400;
+    @apply hidden text-sm text-gray-400 sm:block;
 }
 
 /* ── Period selector ── */
 
 .top-relative__periods {
-    @apply flex flex-shrink-0 flex-wrap gap-2 sm:justify-end;
+    @apply flex flex-shrink-0 flex-wrap gap-1.5 sm:gap-2 sm:justify-end;
 }
 
 .top-relative__period-btn {
-    @apply rounded-full px-4 py-1 text-sm font-medium transition-colors duration-100;
+    @apply rounded-full px-3 py-1 text-sm font-medium transition-colors duration-100 sm:px-4;
 }
 
 .top-relative__period-btn--active {
@@ -276,15 +276,18 @@ const sortedEntries = computed(() => {
 }
 
 .top-relative__head-cell {
-    @apply px-4 py-3 text-xs font-medium uppercase tracking-wider text-gray-500;
+    @apply px-2 py-2 text-xs font-medium uppercase tracking-wider text-gray-500 sm:px-4 sm:py-3;
 }
 
 .top-relative__head-cell--rank {
-    @apply w-12 text-right;
+    @apply w-8 text-right sm:w-12;
+    padding-right: 0;
 }
 
 .top-relative__head-cell--num {
     @apply text-right;
+    width: 1%;
+    white-space: nowrap;
 }
 
 .top-relative__head-cell--sortable {
@@ -325,15 +328,17 @@ const sortedEntries = computed(() => {
 /* ── Cells ── */
 
 .top-relative__cell {
-    @apply px-4 py-2.5;
+    @apply px-2 py-1.5 sm:px-4 sm:py-2.5;
 }
 
 .top-relative__cell--rank {
-    @apply w-12 text-right text-sm font-medium tabular-nums text-gray-400;
+    @apply w-8 text-right text-sm font-medium tabular-nums text-gray-400 sm:w-12;
+    padding-right: 0;
 }
 
 .top-relative__cell--installs {
     @apply text-right;
+    width: 1%;
 }
 
 .top-relative__installs {
@@ -352,10 +357,14 @@ const sortedEntries = computed(() => {
 .top-relative__cell--pct {
     @apply text-right tabular-nums font-semibold;
     color: #86efac;
+    width: 1%;
+    white-space: nowrap;
 }
 
 .top-relative__cell--action {
     @apply text-right;
+    width: 1%;
+    white-space: nowrap;
 }
 
 /* ── Plugin name + author ── */

@@ -5,6 +5,7 @@ use App\Http\Controllers\PluginController;
 use App\Http\Controllers\SitemapController;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/og/{name}.png', \App\Http\Controllers\OgImageController::class)->name('og.image');
 Route::get('/', [PluginController::class, 'index'])->name('home');
 Route::get('/random', [PluginController::class, 'random'])->name('plugin.random');
 Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');

@@ -17,9 +17,19 @@ class GenerateSitemap
                     ->setChangeFrequency(Url::CHANGE_FREQUENCY_DAILY)
             )
             ->add(
-                Url::create(route('plugin.random'))
-                    ->setPriority(0.3)
-                    ->setChangeFrequency(Url::CHANGE_FREQUENCY_ALWAYS)
+                Url::create(route('top'))
+                    ->setPriority(0.8)
+                    ->setChangeFrequency(Url::CHANGE_FREQUENCY_DAILY)
+            )
+            ->add(
+                Url::create(route('top.absolute'))
+                    ->setPriority(0.8)
+                    ->setChangeFrequency(Url::CHANGE_FREQUENCY_DAILY)
+            )
+            ->add(
+                Url::create(route('top.relative'))
+                    ->setPriority(0.8)
+                    ->setChangeFrequency(Url::CHANGE_FREQUENCY_DAILY)
             );
 
         foreach ($plugins as $plugin) {

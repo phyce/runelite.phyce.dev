@@ -81,7 +81,7 @@ const sortedEntries = computed(() => {
 </script>
 
 <template>
-    <Head title="Most Popular - RuneLite Plugin Stats" />
+    <Head title="Most Popular | RuneLite Plugin Stats" />
 
     <div class="top-absolute">
         <div class="top-absolute__top-bar">
@@ -188,35 +188,35 @@ const sortedEntries = computed(() => {
 @reference "tailwindcss";
 
 .top-absolute {
-    @apply mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 pt-4;
+    @apply mx-auto flex w-full max-w-5xl flex-col gap-3 px-4 pt-2 sm:gap-6 sm:pt-4;
 }
 
 /* ── Top bar ── */
 
 .top-absolute__top-bar {
-    @apply flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between;
+    @apply flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3;
 }
 
 .top-absolute__header {
-    @apply flex flex-col gap-1;
+    @apply flex flex-col gap-0.5;
 }
 
 .top-absolute__title {
-    @apply text-2xl font-bold tracking-tight text-orange-500;
+    @apply text-xl font-bold tracking-tight text-orange-500 sm:text-2xl;
 }
 
 .top-absolute__subtitle {
-    @apply text-sm text-gray-400;
+    @apply hidden text-sm text-gray-400 sm:block;
 }
 
 /* ── Period selector ── */
 
 .top-absolute__periods {
-    @apply flex flex-shrink-0 flex-wrap gap-2 sm:justify-end;
+    @apply flex flex-shrink-0 flex-wrap gap-1.5 sm:gap-2 sm:justify-end;
 }
 
 .top-absolute__period-btn {
-    @apply rounded-full px-4 py-1 text-sm font-medium transition-colors duration-100;
+    @apply rounded-full px-3 py-1 text-sm font-medium transition-colors duration-100 sm:px-4;
 }
 
 .top-absolute__period-btn--active {
@@ -276,15 +276,18 @@ const sortedEntries = computed(() => {
 }
 
 .top-absolute__head-cell {
-    @apply px-4 py-3 text-xs font-medium uppercase tracking-wider text-gray-500;
+    @apply px-2 py-2 text-xs font-medium uppercase tracking-wider text-gray-500 sm:px-4 sm:py-3;
 }
 
 .top-absolute__head-cell--rank {
-    @apply w-12 text-right;
+    @apply w-8 text-right sm:w-12;
+    padding-right: 0;
 }
 
 .top-absolute__head-cell--num {
     @apply text-right;
+    width: 1%;
+    white-space: nowrap;
 }
 
 .top-absolute__head-cell--sortable {
@@ -325,15 +328,17 @@ const sortedEntries = computed(() => {
 /* ── Cells ── */
 
 .top-absolute__cell {
-    @apply px-4 py-2.5;
+    @apply px-2 py-1.5 sm:px-4 sm:py-2.5;
 }
 
 .top-absolute__cell--rank {
-    @apply w-12 text-right text-sm font-medium tabular-nums text-gray-400;
+    @apply w-8 text-right text-sm font-medium tabular-nums text-gray-400 sm:w-12;
+    padding-right: 0;
 }
 
 .top-absolute__cell--installs {
     @apply text-right;
+    width: 1%;
 }
 
 .top-absolute__installs {
@@ -351,10 +356,14 @@ const sortedEntries = computed(() => {
 
 .top-absolute__cell--pct {
     @apply text-right tabular-nums font-medium text-gray-300;
+    width: 1%;
+    white-space: nowrap;
 }
 
 .top-absolute__cell--action {
     @apply text-right;
+    width: 1%;
+    white-space: nowrap;
 }
 
 /* ── Plugin name + author ── */

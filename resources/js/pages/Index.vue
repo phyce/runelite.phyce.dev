@@ -3,7 +3,7 @@ import { show } from '@/actions/App/Http/Controllers/PluginController';
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { Plugin } from '@/types';
 import { formatDate, truncateString } from '@/utils/formatting';
-import { Head, usePage } from '@inertiajs/vue3';
+import { Head } from '@inertiajs/vue3';
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 
 defineOptions({ layout: AppLayout });
@@ -12,8 +12,6 @@ const props = defineProps<{
     plugins: Plugin[];
 }>();
 
-const page = usePage<{ appUrl: string }>();
-const appUrl = page.props.appUrl;
 
 type SortField = keyof Plugin;
 type SortDirection = 'asc' | 'desc';
@@ -96,13 +94,7 @@ const columns: { field: SortField; label: string }[] = [
 </script>
 
 <template>
-    <Head title="RuneLite Plugin Stats">
-        <meta name="description" content="Browse and compare install statistics for all RuneLite plugins." />
-        <meta property="og:title" content="RuneLite Plugin Stats" />
-        <meta property="og:description" content="Browse and compare install statistics for all RuneLite plugins." />
-        <meta property="og:type" content="website" />
-        <link rel="canonical" :href="appUrl" />
-    </Head>
+    <Head title="RuneLite Plugin Stats" />
 
     <div ref="tableWrapper" class="plugin-table__wrapper">
         <table class="plugin-table">

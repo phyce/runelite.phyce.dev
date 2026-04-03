@@ -26,8 +26,7 @@ const props = defineProps<{
     plugin: Plugin;
 }>();
 
-const page = usePage<{ apiUrl: string; appUrl: string }>();
-const appUrl = page.props.appUrl;
+const page = usePage<{ apiUrl: string }>();
 const historyData = ref<PluginHistoryData[]>([]);
 const isLoading = ref(true);
 const chartRef = ref();
@@ -171,13 +170,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <Head :title="`${plugin.display || plugin.name} - RuneLite Plugin Stats`">
-        <meta name="description" :content="plugin.description" />
-        <meta property="og:title" :content="`${plugin.display || plugin.name} - RuneLite Plugin Stats`" />
-        <meta property="og:description" :content="plugin.description" />
-        <meta property="og:type" content="website" />
-        <link rel="canonical" :href="`${appUrl}${show.url(plugin.name)}`" />
-    </Head>
+    <Head :title="`${plugin.display || plugin.name} — RuneLite Plugin Stats`" />
 
     <div class="plugin-detail">
         <!-- Info card -->
