@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Services\RuneliteApiService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Storage;
 
 class OgImageController extends Controller
 {
@@ -21,6 +20,8 @@ class OgImageController extends Controller
 
     public function __construct(private RuneliteApiService $runeliteApi) {}
 
+    private const CACHE_TTL = 86400; // 24 hours
+
     public function __invoke(Request $request, string $name): Response
     {
         $plugin = $this->runeliteApi->getPlugin($name, []);
@@ -29,17 +30,33 @@ class OgImageController extends Controller
             abort(404);
         }
 
-        $path = "og/{$name}.png";
+        $cachePath = storage_path("app/og/{$name}.png");
+        $exists = file_exists($cachePath);
+        $isStale = $exists && (time() - filemtime($cachePath)) >= self::CACHE_TTL;
 
-        if (! Storage::disk('local')->exists($path)) {
-            $history = $this->runeliteApi->getPluginHistory($name, []);
-            Storage::disk('local')->put($path, $this->render($plugin, $history));
+        if (! $exists) {
+            // First request: generate synchronously
+            $this->generateAndSave($name, $plugin, $cachePath);
+        } elseif ($isStale) {
+            // Stale: serve existing image now, regenerate after response is sent
+            defer(function () use ($name, $plugin, $cachePath) {
+                $this->generateAndSave($name, $plugin, $cachePath);
+            });
         }
 
-        return response(Storage::disk('local')->get($path), 200, [
+        return response(file_get_contents($cachePath), 200, [
             'Content-Type' => 'image/png',
-            'Cache-Control' => 'public, max-age=86400',
+            'Cache-Control' => 'public, max-age='.self::CACHE_TTL,
         ]);
+    }
+
+    /** @param array<mixed> $plugin */
+    private function generateAndSave(string $name, array $plugin, string $cachePath): void
+    {
+        $history = $this->runeliteApi->getPluginHistory($name, []);
+        $png = $this->render($plugin, $history);
+        @mkdir(dirname($cachePath), 0755, true);
+        file_put_contents($cachePath, $png);
     }
 
     /** @param array<mixed> $history */
