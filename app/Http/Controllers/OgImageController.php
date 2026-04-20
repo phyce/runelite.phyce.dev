@@ -76,86 +76,9 @@ class OgImageController extends Controller
         $cWhite = imagecolorallocate($img, 255, 255, 255);
         $cGray100 = imagecolorallocate($img, 240, 240, 240);
         $cGray300 = imagecolorallocate($img, 190, 190, 190);
-        $cGray500 = imagecolorallocate($img, 107, 114, 128);
 
-        // ── Gradient background — cool near-black at top, warm dark at bottom ──
-        $gradBands = 60;
-        for ($band = 0; $band < $gradBands; $band++) {
-            $gy1 = (int) ($band * $h / $gradBands);
-            $gy2 = (int) (($band + 1) * $h / $gradBands);
-            $t = $band / ($gradBands - 1);
-            imagefilledrectangle($img, 0, $gy1, $w, $gy2, imagecolorallocate($img,
-                (int) (8 + (26 - 8) * $t),   // R: 8 → 26
-                (int) (8 + (10 - 8) * $t),    // G: 8 → 10
-                (int) (12 - (int) (7 * $t))   // B: 12 → 5
-            ));
-        }
-
-        // ── History dots as background ────────────────────────────────────
-        // Bucket-average to a fixed dot count so every plugin looks visually
-        // consistent regardless of how long it has been published.
-        $rawCounts = array_values(array_filter(array_map('intval', array_column($history, 'count'))));
-        $n = count($rawCounts);
-
-        if ($n > 2) {
-            $targetDots = 48;
-            $buckets = min($n, $targetDots);
-            $sampled = [];
-            for ($i = 0; $i < $buckets; $i++) {
-                $start = (int) round($i * $n / $buckets);
-                $end = (int) round(($i + 1) * $n / $buckets);
-                $bucket = array_slice($rawCounts, $start, max(1, $end - $start));
-                $sampled[] = (int) round(array_sum($bucket) / count($bucket));
-            }
-
-            $np = count($sampled);
-            $minC = min($sampled);
-            $maxC = max($sampled);
-            $range = max($maxC - $minC, 1);
-
-            $chartX1 = 0;
-            $chartX2 = $w;
-            $chartY1 = 28;
-            $dotY2 = $h - 126;   // dots stay above the stats text
-            $chartH = $dotY2 - $chartY1;
-
-            // Pre-compute dot positions
-            $pts = [];
-            for ($i = 0; $i < $np; $i++) {
-                $pts[] = [
-                    'x' => (int) ($chartX1 + ($np > 1 ? $i / ($np - 1) : 0) * ($chartX2 - $chartX1)),
-                    'y' => (int) ($dotY2 - (($sampled[$i] - $minC) / $range) * $chartH * 0.85),
-                ];
-            }
-
-            // Alternating filled bands — each band spans 2 dot segments as one polygon
-            // so there are no internal seam lines within a colour band
-            $cFillLight = imagecolorallocatealpha($img, 255, 108, 33, 98);
-            $cFillDark = imagecolorallocatealpha($img, 160, 55, 5, 98);
-            $bandIdx = 0;
-            for ($i = 0; $i < $np - 1; $i += 3) {
-                $end = min($i + 3, $np - 1);
-                // Polygon: bottom-left → follow curve → bottom-right
-                $poly = [$pts[$i]['x'], $h];
-                for ($j = $i; $j <= $end; $j++) {
-                    $poly[] = $pts[$j]['x'];
-                    $poly[] = $pts[$j]['y'];
-                }
-                $poly[] = $pts[$end]['x'];
-                $poly[] = $h;
-                imagefilledpolygon($img, $poly, ($bandIdx % 2 === 0) ? $cFillLight : $cFillDark);
-                $bandIdx++;
-            }
-
-            // Dots — three concentric circles give a soft glow
-            for ($i = 0; $i < $np; $i++) {
-                $x = $pts[$i]['x'];
-                $y = $pts[$i]['y'];
-                imagefilledellipse($img, $x, $y, 30, 30, imagecolorallocatealpha($img, 197, 71, 4, 114));
-                imagefilledellipse($img, $x, $y, 17, 17, imagecolorallocatealpha($img, 230, 85, 10, 86));
-                imagefilledellipse($img, $x, $y, 8, 8, imagecolorallocatealpha($img, 255, 120, 40, 42));
-            }
-        }
+        $this->drawGradientBackground($img, $w, $h);
+        $this->drawHistoryBackground($img, $history, $w, $h);
 
         // ── Left orange accent bar ─────────────────────────────────────────
         imagefilledrectangle($img, 0, 0, 7, $h, $cOrange);
@@ -234,6 +157,106 @@ class OgImageController extends Controller
         imagedestroy($img);
 
         return $data;
+    }
+
+    /**
+     * @param  resource  $img
+     */
+    private function drawGradientBackground($img, int $w, int $h): void
+    {
+        $gradBands = 60;
+        for ($band = 0; $band < $gradBands; $band++) {
+            $gy1 = (int) ($band * $h / $gradBands);
+            $gy2 = (int) (($band + 1) * $h / $gradBands);
+            $t = $band / ($gradBands - 1);
+            imagefilledrectangle($img, 0, $gy1, $w, $gy2, imagecolorallocate($img,
+                (int) (8 + (26 - 8) * $t),
+                (int) (8 + (10 - 8) * $t),
+                (int) (12 - (int) (7 * $t))
+            ));
+        }
+    }
+
+    /**
+     * @param  resource  $img
+     * @param  array<mixed>  $history
+     */
+    private function drawHistoryBackground($img, array $history, int $w, int $h): void
+    {
+        $sampled = $this->sampleHistoryCounts($history);
+        $np = count($sampled);
+
+        if ($np <= 2) {
+            return;
+        }
+
+        $minC = min($sampled);
+        $maxC = max($sampled);
+        $range = max($maxC - $minC, 1);
+
+        $chartX1 = 0;
+        $chartX2 = $w;
+        $chartY1 = 28;
+        $dotY2 = $h - 126;
+        $chartH = $dotY2 - $chartY1;
+
+        $pts = [];
+        for ($i = 0; $i < $np; $i++) {
+            $pts[] = [
+                'x' => (int) ($chartX1 + ($np > 1 ? $i / ($np - 1) : 0) * ($chartX2 - $chartX1)),
+                'y' => (int) ($dotY2 - (($sampled[$i] - $minC) / $range) * $chartH * 0.85),
+            ];
+        }
+
+        $cFillLight = imagecolorallocatealpha($img, 255, 108, 33, 98);
+        $cFillDark = imagecolorallocatealpha($img, 160, 55, 5, 98);
+        $bandIdx = 0;
+        for ($i = 0; $i < $np - 1; $i += 3) {
+            $end = min($i + 3, $np - 1);
+            $poly = [$pts[$i]['x'], $h];
+            for ($j = $i; $j <= $end; $j++) {
+                $poly[] = $pts[$j]['x'];
+                $poly[] = $pts[$j]['y'];
+            }
+            $poly[] = $pts[$end]['x'];
+            $poly[] = $h;
+            imagefilledpolygon($img, $poly, ($bandIdx % 2 === 0) ? $cFillLight : $cFillDark);
+            $bandIdx++;
+        }
+
+        for ($i = 0; $i < $np; $i++) {
+            $x = $pts[$i]['x'];
+            $y = $pts[$i]['y'];
+            imagefilledellipse($img, $x, $y, 30, 30, imagecolorallocatealpha($img, 197, 71, 4, 114));
+            imagefilledellipse($img, $x, $y, 17, 17, imagecolorallocatealpha($img, 230, 85, 10, 86));
+            imagefilledellipse($img, $x, $y, 8, 8, imagecolorallocatealpha($img, 255, 120, 40, 42));
+        }
+    }
+
+    /**
+     * @param  array<mixed>  $history
+     * @return int[]
+     */
+    private function sampleHistoryCounts(array $history): array
+    {
+        $rawCounts = array_values(array_filter(array_map('intval', array_column($history, 'count'))));
+        $n = count($rawCounts);
+
+        if ($n <= 2) {
+            return $rawCounts;
+        }
+
+        $targetDots = 48;
+        $buckets = min($n, $targetDots);
+        $sampled = [];
+        for ($i = 0; $i < $buckets; $i++) {
+            $start = (int) round($i * $n / $buckets);
+            $end = (int) round(($i + 1) * $n / $buckets);
+            $bucket = array_slice($rawCounts, $start, max(1, $end - $start));
+            $sampled[] = (int) round(array_sum($bucket) / count($bucket));
+        }
+
+        return $sampled;
     }
 
     /** @return string[] */

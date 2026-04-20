@@ -45,3 +45,11 @@ export interface Top100Metrics {
     computed_at: string;
     rankings: RankedPlugin[];
 }
+
+export interface SharedInertiaProps {
+    errors: Record<string, string>;
+    name: string;
+    apiUrl: string;
+    appUrl: string;
+    plugins: Plugin[];
+}

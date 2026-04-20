@@ -6,15 +6,28 @@ export function formatDate(dateString: string): string {
         month: 'long',
         day: 'numeric',
     };
-    return new Intl.DateTimeFormat('en-US', options).format(new Date(dateString));
+    return new Intl.DateTimeFormat('en-US', options).format(
+        new Date(dateString),
+    );
 }
 
-export function formatChartDate(dateString: string, includeTime: boolean): string {
+export function formatChartDate(
+    dateString: string,
+    includeTime: boolean,
+): string {
     const date = new Date(dateString);
     if (includeTime) {
-        return new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).format(date);
+        return new Intl.DateTimeFormat('en-US', {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true,
+        }).format(date);
     }
-    return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(date);
+    return new Intl.DateTimeFormat('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+    }).format(date);
 }
 
 export function formatNumber(num: number): string {
@@ -37,7 +50,13 @@ export function scoreSearchResult(plugin: Plugin, query: string): number {
     let score = 0;
 
     const wordsInFields = new Set<string>();
-    const fieldsToSearch = [plugin.name, plugin.display, plugin.author, plugin.description, plugin.tags];
+    const fieldsToSearch = [
+        plugin.name,
+        plugin.display,
+        plugin.author,
+        plugin.description,
+        plugin.tags,
+    ];
 
     fieldsToSearch.forEach((field) => {
         if (field) {

@@ -9,9 +9,9 @@
     ],
     "license": "MIT",
     "require": {
-        "php": "^8.2",
-        "artesaos/seotools": "*",
-        "inertiajs/inertia-laravel": "^2.0",
+        "php": "^8.5",
+        "artesaos/seotools": "1.4.1",
+        "inertiajs/inertia-laravel": "^3.0",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
         "laravel/wayfinder": "^0.1.11",
