@@ -5,8 +5,8 @@
 
 @theme inline {
     --font-sans:
-        Poppins, ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
-        'Noto Color Emoji';
+        Poppins, ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
+        'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 
     --color-orange-primary: #ff6c21;
     --color-orange-dark: #c54704;

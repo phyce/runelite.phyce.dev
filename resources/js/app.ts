@@ -6,7 +6,30 @@ import '../css/app.css';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
+function getLegacyInitialPage() {
+    if (typeof document === 'undefined') {
+        return undefined;
+    }
+
+    const appEl = document.getElementById('app');
+    const legacyPage = appEl?.getAttribute('data-page');
+
+    if (!legacyPage) {
+        return undefined;
+    }
+
+    try {
+        return JSON.parse(legacyPage);
+    } catch {
+        return undefined;
+    }
+}
+
 createInertiaApp({
+    // Inertia v3 reads initial page from <script data-page="app">.
+    // This fallback keeps the app working if a stale cached HTML page still
+    // contains the older <div id="app" data-page="..."> markup.
+    page: getLegacyInitialPage(),
     title: (title) => (title ? `${title} - ${appName}` : appName),
     resolve: (name) =>
         resolvePageComponent(

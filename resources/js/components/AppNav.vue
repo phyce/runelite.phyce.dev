@@ -29,7 +29,11 @@ function isActive(href: string, exact: boolean): boolean {
                 :key="link.href"
                 :href="link.href"
                 class="app-nav__link"
-                :class="isActive(link.href, link.exact) ? 'app-nav__link--active' : 'app-nav__link--inactive'"
+                :class="
+                    isActive(link.href, link.exact)
+                        ? 'app-nav__link--active'
+                        : 'app-nav__link--inactive'
+                "
             >
                 {{ link.label }}
             </a>

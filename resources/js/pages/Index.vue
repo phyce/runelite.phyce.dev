@@ -1,17 +1,18 @@
 <script setup lang="ts">
-import { show } from '@/actions/App/Http/Controllers/PluginController';
-import AppLayout from '@/layouts/AppLayout.vue';
-import type { Plugin } from '@/types';
-import { formatDate, truncateString } from '@/utils/formatting';
 import { Head } from '@inertiajs/vue3';
 import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { show } from '@/actions/App/Http/Controllers/PluginController';
+import AppLayout from '@/layouts/AppLayout.vue';
+import type { Plugin, SharedInertiaProps } from '@/types';
+import { formatDate, truncateString } from '@/utils/formatting';
 
 defineOptions({ layout: AppLayout });
 
-const props = defineProps<{
-    plugins: Plugin[];
-}>();
-
+const props = defineProps<
+    SharedInertiaProps & {
+        plugins: Plugin[];
+    }
+>();
 
 type SortField = keyof Plugin;
 type SortDirection = 'asc' | 'desc';
@@ -38,7 +39,9 @@ const sortedPlugins = computed(() => {
         const valueA = a[sortField.value];
         const valueB = b[sortField.value];
         if (typeof valueA === 'number' && typeof valueB === 'number') {
-            return sortDirection.value === 'asc' ? valueA - valueB : valueB - valueA;
+            return sortDirection.value === 'asc'
+                ? valueA - valueB
+                : valueB - valueA;
         }
         return sortDirection.value === 'asc'
             ? String(valueA).localeCompare(String(valueB))
@@ -94,7 +97,9 @@ const columns: { field: SortField; label: string }[] = [
 </script>
 
 <template>
-    <Head title="RuneLite Plugin Stats" />
+    <Head>
+        <title>RuneLite Plugin Stats</title>
+    </Head>
 
     <div ref="tableWrapper" class="plugin-table__wrapper">
         <table class="plugin-table">
@@ -108,7 +113,14 @@ const columns: { field: SortField; label: string }[] = [
                         @click="handleSort(col.field)"
                     >
                         {{ col.label }}
-                        <span :class="sortField === col.field ? 'plugin-table__sort--active' : 'plugin-table__sort--inactive'">{{ sortIndicator(col.field) }}</span>
+                        <span
+                            :class="
+                                sortField === col.field
+                                    ? 'plugin-table__sort--active'
+                                    : 'plugin-table__sort--inactive'
+                            "
+                            >{{ sortIndicator(col.field) }}</span
+                        >
                     </th>
                     <th scope="col" class="plugin-table__head-cell"></th>
                 </tr>
@@ -119,7 +131,11 @@ const columns: { field: SortField; label: string }[] = [
                     :key="plugin.id"
                     :title="plugin.warning"
                     class="plugin-table__row"
-                    :class="index % 2 === 0 ? 'plugin-table__row--even' : 'plugin-table__row--odd'"
+                    :class="
+                        index % 2 === 0
+                            ? 'plugin-table__row--even'
+                            : 'plugin-table__row--odd'
+                    "
                 >
                     <td class="plugin-table__cell">
                         <a
@@ -127,15 +143,34 @@ const columns: { field: SortField; label: string }[] = [
                             :href="`https://runelite.net/plugin-hub/show/${plugin.name}`"
                             target="_blank"
                             rel="noopener noreferrer"
-                        >{{ plugin.display || plugin.name }}</a>
-                        <span v-if="plugin.author" class="plugin-table__author">by {{ plugin.author }}</span>
+                            >{{ plugin.display || plugin.name }}</a
+                        >
+                        <span v-if="plugin.author" class="plugin-table__author"
+                            >by {{ plugin.author }}</span
+                        >
                     </td>
-                    <td class="plugin-table__cell plugin-table__cell--num">{{ plugin.current_installs.toLocaleString('en-US') }}</td>
-                    <td class="plugin-table__cell plugin-table__cell--num plugin-table__cell--secondary">{{ plugin.all_time_high.toLocaleString('en-US') }}</td>
-                    <td class="plugin-table__cell plugin-table__cell--desc">{{ truncateString(plugin.description, 100) }}</td>
-                    <td class="plugin-table__cell plugin-table__cell--secondary plugin-table__cell--date">{{ formatDate(plugin.updated_on) }}</td>
+                    <td class="plugin-table__cell plugin-table__cell--num">
+                        {{ plugin.current_installs.toLocaleString('en-US') }}
+                    </td>
+                    <td
+                        class="plugin-table__cell plugin-table__cell--num plugin-table__cell--secondary"
+                    >
+                        {{ plugin.all_time_high.toLocaleString('en-US') }}
+                    </td>
+                    <td class="plugin-table__cell plugin-table__cell--desc">
+                        {{ truncateString(plugin.description, 100) }}
+                    </td>
+                    <td
+                        class="plugin-table__cell plugin-table__cell--secondary plugin-table__cell--date"
+                    >
+                        {{ formatDate(plugin.updated_on) }}
+                    </td>
                     <td class="plugin-table__cell plugin-table__cell--action">
-                        <a :href="show.url(plugin.name)" class="plugin-table__stats-link">Stats</a>
+                        <a
+                            :href="show.url(plugin.name)"
+                            class="plugin-table__stats-link"
+                            >Stats</a
+                        >
                     </td>
                 </tr>
             </tbody>
@@ -143,7 +178,10 @@ const columns: { field: SortField; label: string }[] = [
     </div>
 
     <div ref="stickyScrollbar" class="plugin-table__scrollbar">
-        <div :style="{ width: scrollWidth + 'px' }" class="plugin-table__scrollbar-spacer" />
+        <div
+            :style="{ width: scrollWidth + 'px' }"
+            class="plugin-table__scrollbar-spacer"
+        />
     </div>
 </template>
 
@@ -169,7 +207,7 @@ const columns: { field: SortField; label: string }[] = [
 }
 
 .plugin-table__head-cell {
-    @apply px-4 py-3 text-xs font-medium uppercase tracking-wider text-gray-500;
+    @apply px-4 py-3 text-xs font-medium tracking-wider text-gray-500 uppercase;
     white-space: nowrap;
 }
 
@@ -211,7 +249,7 @@ const columns: { field: SortField; label: string }[] = [
 }
 
 .plugin-table__cell--num {
-    @apply tabular-nums font-medium text-gray-200;
+    @apply font-medium text-gray-200 tabular-nums;
     white-space: nowrap;
 }
 
@@ -238,7 +276,7 @@ const columns: { field: SortField; label: string }[] = [
 }
 
 .plugin-table__author {
-    @apply ml-1.5 text-xs text-gray-500;
+    @apply ml-1.5 text-xs text-gray-300;
 }
 
 .plugin-table__stats-link {

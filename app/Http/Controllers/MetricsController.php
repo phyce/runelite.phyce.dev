@@ -12,6 +12,10 @@ use Inertia\Response;
 
 class MetricsController extends Controller
 {
+    private const STATIC_OG_IMAGE = 'img/og-static.png';
+
+    private const ROBOTS_INDEX_FOLLOW = 'index, follow';
+
     public function __construct(private RuneliteApiService $runeliteApi) {}
 
     public function top100(): Response
@@ -30,13 +34,13 @@ class MetricsController extends Controller
         SEOTools::opengraph()->addProperty('title', 'Top 100 RuneLite Plugins | RuneLite Plugin Stats');
         SEOTools::opengraph()->addProperty('description', $description);
         SEOTools::opengraph()->addProperty('site_name', config('app.name'));
-        SEOTools::opengraph()->addImage(asset('img/og-static.png'));
+        SEOTools::opengraph()->addImage(asset(self::STATIC_OG_IMAGE));
         SEOMeta::setCanonical(route('top'));
-        SEOMeta::addMeta('robots', 'index, follow');
+        SEOMeta::addMeta('robots', self::ROBOTS_INDEX_FOLLOW);
         TwitterCard::setTitle('Best RuneLite Plugins — Top 100 Ranked');
         TwitterCard::setDescription($description);
         TwitterCard::setType('summary_large_image');
-        TwitterCard::setImage(asset('img/og-static.png'));
+        TwitterCard::setImage(asset(self::STATIC_OG_IMAGE));
 
         $listElements = collect($data['rankings'] ?? [])
             ->take(100)
@@ -82,11 +86,11 @@ class MetricsController extends Controller
         SEOTools::opengraph()->addProperty('title', 'Most Popular RuneLite Plugins | RuneLite Plugin Stats');
         SEOTools::opengraph()->addProperty('description', 'See which RuneLite plugins are gaining the most new installs.');
         SEOTools::opengraph()->addProperty('site_name', config('app.name'));
-        SEOTools::opengraph()->addImage(asset('img/og-static.png'));
+        SEOTools::opengraph()->addImage(asset(self::STATIC_OG_IMAGE));
         SEOMeta::setCanonical(route('top.absolute'));
-        SEOMeta::addMeta('robots', 'index, follow');
+        SEOMeta::addMeta('robots', self::ROBOTS_INDEX_FOLLOW);
         TwitterCard::setType('summary_large_image');
-        TwitterCard::setImage(asset('img/og-static.png'));
+        TwitterCard::setImage(asset(self::STATIC_OG_IMAGE));
 
         return inertia('TopAbsolute', [
             'entries' => $data,
@@ -106,11 +110,11 @@ class MetricsController extends Controller
         SEOTools::opengraph()->addProperty('title', 'Fastest Growing RuneLite Plugins | RuneLite Plugin Stats');
         SEOTools::opengraph()->addProperty('description', 'See which RuneLite plugins are growing the fastest.');
         SEOTools::opengraph()->addProperty('site_name', config('app.name'));
-        SEOTools::opengraph()->addImage(asset('img/og-static.png'));
+        SEOTools::opengraph()->addImage(asset(self::STATIC_OG_IMAGE));
         SEOMeta::setCanonical(route('top.relative'));
-        SEOMeta::addMeta('robots', 'index, follow');
+        SEOMeta::addMeta('robots', self::ROBOTS_INDEX_FOLLOW);
         TwitterCard::setType('summary_large_image');
-        TwitterCard::setImage(asset('img/og-static.png'));
+        TwitterCard::setImage(asset(self::STATIC_OG_IMAGE));
 
         return inertia('TopRelative', [
             'entries' => $data,
