@@ -1,8 +1,4 @@
 <script setup lang="ts">
-import { show } from '@/actions/App/Http/Controllers/PluginController';
-import AppLayout from '@/layouts/AppLayout.vue';
-import type { Plugin, PluginHistoryData } from '@/types';
-import { formatChartDate, formatDate, formatNumber } from '@/utils/formatting';
 import { Head, router, usePage } from '@inertiajs/vue3';
 import {
     CategoryScale,
@@ -17,21 +13,39 @@ import {
 } from 'chart.js';
 import { onMounted, onUnmounted, ref } from 'vue';
 import { Line } from 'vue-chartjs';
+import { show } from '@/actions/App/Http/Controllers/PluginController';
+import AppLayout from '@/layouts/AppLayout.vue';
+import type { Plugin, PluginHistoryData, SharedInertiaProps } from '@/types';
+import { formatChartDate, formatDate, formatNumber } from '@/utils/formatting';
 
-ChartJS.register(Title, Tooltip, Legend, LineElement, LinearScale, CategoryScale, PointElement, Filler);
+ChartJS.register(
+    Title,
+    Tooltip,
+    Legend,
+    LineElement,
+    LinearScale,
+    CategoryScale,
+    PointElement,
+    Filler,
+);
 
 defineOptions({ layout: AppLayout });
 
-const props = defineProps<{
-    plugin: Plugin;
-}>();
+const props = defineProps<
+    SharedInertiaProps & {
+        plugin: Plugin;
+    }
+>();
 
 const page = usePage<{ apiUrl: string }>();
 const historyData = ref<PluginHistoryData[]>([]);
 const isLoading = ref(true);
 const chartRef = ref();
 
-const currentRange = ref<string>((page.props.ziggy as { query?: Record<string, string> })?.query?.range ?? 'all');
+const currentRange = ref<string>(
+    (page.props.ziggy as { query?: Record<string, string> })?.query?.range ??
+        'all',
+);
 
 const chartData = ref({
     labels: [] as string[],
@@ -104,7 +118,9 @@ async function fetchHistory(): Promise<void> {
         historyData.value = json.data ?? [];
         const includeTime = currentRange.value === 'day';
         chartData.value = {
-            labels: historyData.value.map((d) => formatChartDate(d.date, includeTime)),
+            labels: historyData.value.map((d) =>
+                formatChartDate(d.date, includeTime),
+            ),
             datasets: [
                 {
                     label: 'Install Count Over Time',
@@ -170,7 +186,11 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <Head :title="`${plugin.display || plugin.name} — RuneLite Plugin Stats`" />
+    <Head>
+        <title>
+            {{ `${plugin.display || plugin.name} — RuneLite Plugin Stats` }}
+        </title>
+    </Head>
 
     <div class="plugin-detail">
         <!-- Info card -->
@@ -185,23 +205,36 @@ onUnmounted(() => {
             <div class="plugin-detail__stats">
                 <div class="plugin-detail__stat">
                     <div class="plugin-detail__stat-label">Author</div>
-                    <div class="plugin-detail__stat-value" :title="plugin.author">{{ plugin.author }}</div>
+                    <div
+                        class="plugin-detail__stat-value"
+                        :title="plugin.author"
+                    >
+                        {{ plugin.author }}
+                    </div>
                 </div>
                 <div class="plugin-detail__stat">
                     <div class="plugin-detail__stat-label">Last Update</div>
-                    <div class="plugin-detail__stat-value">{{ formatDate(plugin.updated_on) }}</div>
+                    <div class="plugin-detail__stat-value">
+                        {{ formatDate(plugin.updated_on) }}
+                    </div>
                 </div>
                 <div class="plugin-detail__stat">
                     <div class="plugin-detail__stat-label">All-time High</div>
-                    <div class="plugin-detail__stat-value">{{ formatNumber(plugin.all_time_high) }}</div>
+                    <div class="plugin-detail__stat-value">
+                        {{ formatNumber(plugin.all_time_high) }}
+                    </div>
                 </div>
                 <div class="plugin-detail__stat">
                     <div class="plugin-detail__stat-label">Released On</div>
-                    <div class="plugin-detail__stat-value">{{ formatDate(plugin.created_on) }}</div>
+                    <div class="plugin-detail__stat-value">
+                        {{ formatDate(plugin.created_on) }}
+                    </div>
                 </div>
                 <div class="plugin-detail__stat">
                     <div class="plugin-detail__stat-label">Active Installs</div>
-                    <div class="plugin-detail__stat-value">{{ formatNumber(plugin.current_installs) }}</div>
+                    <div class="plugin-detail__stat-value">
+                        {{ formatNumber(plugin.current_installs) }}
+                    </div>
                 </div>
             </div>
 
@@ -240,7 +273,11 @@ onUnmounted(() => {
                     v-for="range in ranges"
                     :key="range.value"
                     class="plugin-detail__range-btn"
-                    :class="currentRange === range.value ? 'plugin-detail__range-btn--active' : 'plugin-detail__range-btn--inactive'"
+                    :class="
+                        currentRange === range.value
+                            ? 'plugin-detail__range-btn--active'
+                            : 'plugin-detail__range-btn--inactive'
+                    "
                     @click="setRange(range.value)"
                 >
                     {{ range.label }}
@@ -249,11 +286,13 @@ onUnmounted(() => {
 
             <!-- Chart -->
             <div class="plugin-detail__chart-area">
-                <div
-                    v-if="isLoading"
-                    class="plugin-detail__chart-skeleton"
+                <div v-if="isLoading" class="plugin-detail__chart-skeleton" />
+                <Line
+                    ref="chartRef"
+                    v-else
+                    :data="chartData"
+                    :options="chartOptions"
                 />
-                <Line ref="chartRef" v-else :data="chartData" :options="chartOptions" />
             </div>
         </div>
     </div>
@@ -288,7 +327,7 @@ onUnmounted(() => {
 }
 
 .plugin-detail__tags {
-    @apply mb-3 break-words text-xs text-gray-400;
+    @apply mb-3 text-xs wrap-break-word text-gray-400;
 }
 
 .plugin-detail__stats {

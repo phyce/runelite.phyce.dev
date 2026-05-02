@@ -78,7 +78,7 @@ class PluginController extends Controller
         ]);
     }
 
-    public function random(Request $request): RedirectResponse
+    public function random(): RedirectResponse
     {
         $plugin = $this->runeliteApi->getRandomPlugin();
 

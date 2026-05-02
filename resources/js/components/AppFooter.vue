@@ -1,7 +1,12 @@
 <template>
     <footer class="app-footer">
         Made by
-        <a href="https://phyce.dev" class="app-footer__link" target="_blank" rel="noopener noreferrer">
+        <a
+            href="https://phyce.dev"
+            class="app-footer__link"
+            target="_blank"
+            rel="noopener noreferrer"
+        >
             Phyce
         </a>
     </footer>

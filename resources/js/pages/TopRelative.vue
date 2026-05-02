@@ -1,17 +1,19 @@
 <script setup lang="ts">
-import { show } from '@/actions/App/Http/Controllers/PluginController';
-import AppLayout from '@/layouts/AppLayout.vue';
-import type { GrowthEntry } from '@/types';
-import { formatNumber } from '@/utils/formatting';
 import { Head, router } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
+import { show } from '@/actions/App/Http/Controllers/PluginController';
+import AppLayout from '@/layouts/AppLayout.vue';
+import type { GrowthEntry, SharedInertiaProps } from '@/types';
+import { formatNumber } from '@/utils/formatting';
 
 defineOptions({ layout: AppLayout });
 
-const props = defineProps<{
-    entries: GrowthEntry[] | null;
-    period: string;
-}>();
+const props = defineProps<
+    SharedInertiaProps & {
+        entries: GrowthEntry[] | null;
+        period: string;
+    }
+>();
 
 const currentPeriod = ref(props.period);
 
@@ -25,7 +27,11 @@ const periods = [
 
 function setPeriod(period: string): void {
     currentPeriod.value = period;
-    router.get('/top/relative', { period }, { preserveState: true, preserveScroll: true });
+    router.get(
+        '/top/relative',
+        { period },
+        { preserveState: true, preserveScroll: true },
+    );
 }
 
 type SortField = 'rank' | 'name' | 'pct_growth' | 'absolute_growth';
@@ -50,10 +56,14 @@ function sortIndicator(field: SortField): string {
 
 function getValue(entry: GrowthEntry, field: SortField): string | number {
     switch (field) {
-        case 'rank': return entry.rank;
-        case 'name': return (entry.plugin.display || entry.plugin.name).toLowerCase();
-        case 'pct_growth': return entry.pct_growth;
-        case 'absolute_growth': return entry.absolute_growth;
+        case 'rank':
+            return entry.rank;
+        case 'name':
+            return (entry.plugin.display || entry.plugin.name).toLowerCase();
+        case 'pct_growth':
+            return entry.pct_growth;
+        case 'absolute_growth':
+            return entry.absolute_growth;
     }
 }
 
@@ -81,13 +91,18 @@ const sortedEntries = computed(() => {
 </script>
 
 <template>
-    <Head title="Fastest Growing | RuneLite Plugin Stats" />
+    <Head>
+        <title>Fastest Growing | RuneLite Plugin Stats</title>
+    </Head>
 
     <div class="top-relative">
         <div class="top-relative__top-bar">
             <div class="top-relative__header">
                 <h1 class="top-relative__title">Fastest Growing</h1>
-                <p class="top-relative__subtitle">Ranked by percentage install count growth in the selected time period.</p>
+                <p class="top-relative__subtitle">
+                    Ranked by percentage install count growth in the selected
+                    time period.
+                </p>
             </div>
 
             <div class="top-relative__periods">
@@ -95,7 +110,11 @@ const sortedEntries = computed(() => {
                     v-for="p in periods"
                     :key="p.value"
                     class="top-relative__period-btn"
-                    :class="currentPeriod === p.value ? 'top-relative__period-btn--active' : 'top-relative__period-btn--inactive'"
+                    :class="
+                        currentPeriod === p.value
+                            ? 'top-relative__period-btn--active'
+                            : 'top-relative__period-btn--inactive'
+                    "
                     @click="setPeriod(p.value)"
                 >
                     {{ p.label }}
@@ -104,7 +123,10 @@ const sortedEntries = computed(() => {
         </div>
 
         <div v-if="!sortedEntries.length" class="top-relative__empty">
-            <p>Growth data is not yet available for this period. Check back soon.</p>
+            <p>
+                Growth data is not yet available for this period. Check back
+                soon.
+            </p>
         </div>
 
         <div v-else class="top-relative__wrapper">
@@ -117,7 +139,14 @@ const sortedEntries = computed(() => {
                             @click="handleSort('rank')"
                         >
                             #
-                            <span :class="sortField === 'rank' ? 'top-relative__sort--active' : 'top-relative__sort--inactive'">{{ sortIndicator('rank') }}</span>
+                            <span
+                                :class="
+                                    sortField === 'rank'
+                                        ? 'top-relative__sort--active'
+                                        : 'top-relative__sort--inactive'
+                                "
+                                >{{ sortIndicator('rank') }}</span
+                            >
                         </th>
                         <th
                             scope="col"
@@ -125,7 +154,14 @@ const sortedEntries = computed(() => {
                             @click="handleSort('name')"
                         >
                             Plugin
-                            <span :class="sortField === 'name' ? 'top-relative__sort--active' : 'top-relative__sort--inactive'">{{ sortIndicator('name') }}</span>
+                            <span
+                                :class="
+                                    sortField === 'name'
+                                        ? 'top-relative__sort--active'
+                                        : 'top-relative__sort--inactive'
+                                "
+                                >{{ sortIndicator('name') }}</span
+                            >
                         </th>
                         <th
                             scope="col"
@@ -133,7 +169,14 @@ const sortedEntries = computed(() => {
                             @click="handleSort('pct_growth')"
                         >
                             % Change
-                            <span :class="sortField === 'pct_growth' ? 'top-relative__sort--active' : 'top-relative__sort--inactive'">{{ sortIndicator('pct_growth') }}</span>
+                            <span
+                                :class="
+                                    sortField === 'pct_growth'
+                                        ? 'top-relative__sort--active'
+                                        : 'top-relative__sort--inactive'
+                                "
+                                >{{ sortIndicator('pct_growth') }}</span
+                            >
                         </th>
                         <th
                             scope="col"
@@ -141,7 +184,14 @@ const sortedEntries = computed(() => {
                             @click="handleSort('absolute_growth')"
                         >
                             Installs
-                            <span :class="sortField === 'absolute_growth' ? 'top-relative__sort--active' : 'top-relative__sort--inactive'">{{ sortIndicator('absolute_growth') }}</span>
+                            <span
+                                :class="
+                                    sortField === 'absolute_growth'
+                                        ? 'top-relative__sort--active'
+                                        : 'top-relative__sort--inactive'
+                                "
+                                >{{ sortIndicator('absolute_growth') }}</span
+                            >
                         </th>
                         <th scope="col" class="top-relative__head-cell"></th>
                     </tr>
@@ -151,9 +201,15 @@ const sortedEntries = computed(() => {
                         v-for="(entry, index) in sortedEntries"
                         :key="entry.plugin.id"
                         class="top-relative__row"
-                        :class="index % 2 === 0 ? 'top-relative__row--even' : 'top-relative__row--odd'"
+                        :class="
+                            index % 2 === 0
+                                ? 'top-relative__row--even'
+                                : 'top-relative__row--odd'
+                        "
                     >
-                        <td class="top-relative__cell top-relative__cell--rank">{{ entry.rank }}</td>
+                        <td class="top-relative__cell top-relative__cell--rank">
+                            {{ entry.rank }}
+                        </td>
                         <td class="top-relative__cell">
                             <div class="top-relative__plugin">
                                 <a
@@ -161,21 +217,49 @@ const sortedEntries = computed(() => {
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     class="top-relative__plugin-name"
-                                >{{ entry.plugin.display || entry.plugin.name }}</a>
-                                <span v-if="entry.plugin.author" class="top-relative__plugin-author">by {{ entry.plugin.author }}</span>
+                                    >{{
+                                        entry.plugin.display ||
+                                        entry.plugin.name
+                                    }}</a
+                                >
+                                <span
+                                    v-if="entry.plugin.author"
+                                    class="top-relative__plugin-author"
+                                    >by {{ entry.plugin.author }}</span
+                                >
                             </div>
                         </td>
                         <td class="top-relative__cell top-relative__cell--pct">
-                            {{ hasWindowBaseline(entry) ? (entry.pct_growth >= 0 ? '+' : '') + entry.pct_growth.toFixed(1) + '%' : '—' }}
+                            {{
+                                hasWindowBaseline(entry)
+                                    ? (entry.pct_growth >= 0 ? '+' : '') +
+                                      entry.pct_growth.toFixed(1) +
+                                      '%'
+                                    : '—'
+                            }}
                         </td>
-                        <td class="top-relative__cell top-relative__cell--installs">
+                        <td
+                            class="top-relative__cell top-relative__cell--installs"
+                        >
                             <div class="top-relative__installs">
-                                <span class="top-relative__installs-total">{{ formatNumber(entry.plugin.current_installs) }}</span>
-                                <span class="top-relative__installs-gain">+{{ formatNumber(entry.absolute_growth) }}</span>
+                                <span class="top-relative__installs-total">{{
+                                    formatNumber(entry.plugin.current_installs)
+                                }}</span>
+                                <span class="top-relative__installs-gain"
+                                    >+{{
+                                        formatNumber(entry.absolute_growth)
+                                    }}</span
+                                >
                             </div>
                         </td>
-                        <td class="top-relative__cell top-relative__cell--action">
-                            <a :href="show.url(entry.plugin.name)" class="top-relative__stats-link">Stats</a>
+                        <td
+                            class="top-relative__cell top-relative__cell--action"
+                        >
+                            <a
+                                :href="show.url(entry.plugin.name)"
+                                class="top-relative__stats-link"
+                                >Stats</a
+                            >
                         </td>
                     </tr>
                 </tbody>
@@ -212,7 +296,7 @@ const sortedEntries = computed(() => {
 /* ── Period selector ── */
 
 .top-relative__periods {
-    @apply flex flex-shrink-0 flex-wrap gap-1.5 sm:gap-2 sm:justify-end;
+    @apply flex shrink-0 flex-wrap gap-1.5 sm:justify-end sm:gap-2;
 }
 
 .top-relative__period-btn {
@@ -276,7 +360,7 @@ const sortedEntries = computed(() => {
 }
 
 .top-relative__head-cell {
-    @apply px-2 py-2 text-xs font-medium uppercase tracking-wider text-gray-500 sm:px-4 sm:py-3;
+    @apply px-2 py-2 text-xs font-medium tracking-wider text-gray-500 uppercase sm:px-4 sm:py-3;
 }
 
 .top-relative__head-cell--rank {
@@ -332,7 +416,7 @@ const sortedEntries = computed(() => {
 }
 
 .top-relative__cell--rank {
-    @apply w-8 text-right text-sm font-medium tabular-nums text-gray-400 sm:w-12;
+    @apply w-8 text-right text-sm font-medium text-gray-400 tabular-nums sm:w-12;
     padding-right: 0;
 }
 
@@ -346,7 +430,7 @@ const sortedEntries = computed(() => {
 }
 
 .top-relative__installs-total {
-    @apply text-sm font-bold tabular-nums text-gray-200;
+    @apply text-sm font-bold text-gray-200 tabular-nums;
 }
 
 .top-relative__installs-gain {
@@ -355,7 +439,7 @@ const sortedEntries = computed(() => {
 }
 
 .top-relative__cell--pct {
-    @apply text-right tabular-nums font-semibold;
+    @apply text-right font-semibold tabular-nums;
     color: #86efac;
     width: 1%;
     white-space: nowrap;
@@ -370,7 +454,7 @@ const sortedEntries = computed(() => {
 /* ── Plugin name + author ── */
 
 .top-relative__plugin {
-    @apply flex flex-col gap-0 min-w-0;
+    @apply flex min-w-0 flex-col gap-0;
 }
 
 .top-relative__plugin-name {
@@ -378,7 +462,7 @@ const sortedEntries = computed(() => {
 }
 
 .top-relative__plugin-author {
-    @apply truncate text-xs text-gray-400;
+    @apply truncate text-xs text-gray-300;
 }
 
 /* ── Stats link ── */
