@@ -9,7 +9,9 @@ use Artesaos\SEOTools\Facades\SEOTools;
 use Artesaos\SEOTools\Facades\TwitterCard;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 use Inertia\Response;
 
 class PluginController extends Controller
@@ -52,10 +54,24 @@ class PluginController extends Controller
 
         $pluginName = $plugin['display'] ?? $plugin['name'];
         $title = "{$pluginName} — RuneLite Plugin Stats";
+
+        $metaParts = [];
+        if (! empty($plugin['author'])) {
+            $metaParts[] = "by {$plugin['author']}";
+        }
+        if (! empty($plugin['created_on'])) {
+            $metaParts[] = 'released : '.Carbon::parse($plugin['created_on'])->format('F j, Y');
+        }
+        $metaPrefix = implode(', ', $metaParts);
+
         $pluginDesc = $plugin['description'] ?? '';
-        $description = $pluginDesc
-            ? mb_substr($pluginDesc, 0, 155)
+        $summary = $pluginDesc !== ''
+            ? $pluginDesc
             : "Install stats and history for the {$pluginName} RuneLite plugin.";
+
+        $description = $metaPrefix !== ''
+            ? Str::limit("{$metaPrefix}. {$summary}", 160)
+            : Str::limit($summary, 160);
         $imageUrl = route('og.image', ['name' => $name]);
 
         SEOTools::setTitle($title);
