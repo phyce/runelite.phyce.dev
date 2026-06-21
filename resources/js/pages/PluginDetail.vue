@@ -179,10 +179,10 @@ onUnmounted(() => {
                 {{ plugin.display || plugin.name }}
             </h3>
             <p class="plugin-detail__description">{{ plugin.description }}</p>
-            <p class="plugin-detail__tags">{{ plugin.tags }}</p>
+            <p class="plugin-detail__tags" data-nosnippet>{{ plugin.tags }}</p>
 
             <!-- Stats grid -->
-            <div class="plugin-detail__stats">
+            <div class="plugin-detail__stats" data-nosnippet>
                 <div class="plugin-detail__stat">
                     <div class="plugin-detail__stat-label">Author</div>
                     <div class="plugin-detail__stat-value" :title="plugin.author">{{ plugin.author }}</div>
