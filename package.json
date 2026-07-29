@@ -28,7 +28,7 @@
         "vue-tsc": "^2.2.4"
     },
     "dependencies": {
-        "@inertiajs/vue3": "^2.3.7",
+        "@inertiajs/vue3": "^3.6.1",
         "@tailwindcss/vite": "^4.1.11",
         "@vitejs/plugin-vue": "^6.0.0",
         "@vueuse/core": "^12.8.2",

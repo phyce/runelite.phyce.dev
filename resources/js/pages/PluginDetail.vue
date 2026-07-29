@@ -1,8 +1,4 @@
 <script setup lang="ts">
-import { show } from '@/actions/App/Http/Controllers/PluginController';
-import AppLayout from '@/layouts/AppLayout.vue';
-import type { Plugin, PluginHistoryData } from '@/types';
-import { formatChartDate, formatDate, formatNumber } from '@/utils/formatting';
 import { Head, router, usePage } from '@inertiajs/vue3';
 import {
     CategoryScale,
@@ -17,8 +13,21 @@ import {
 } from 'chart.js';
 import { onMounted, onUnmounted, ref } from 'vue';
 import { Line } from 'vue-chartjs';
+import { show } from '@/actions/App/Http/Controllers/PluginController';
+import AppLayout from '@/layouts/AppLayout.vue';
+import type { Plugin, PluginHistoryData } from '@/types';
+import { formatChartDate, formatDate, formatNumber } from '@/utils/formatting';
 
-ChartJS.register(Title, Tooltip, Legend, LineElement, LinearScale, CategoryScale, PointElement, Filler);
+ChartJS.register(
+    Title,
+    Tooltip,
+    Legend,
+    LineElement,
+    LinearScale,
+    CategoryScale,
+    PointElement,
+    Filler,
+);
 
 defineOptions({ layout: AppLayout });
 
@@ -31,7 +40,26 @@ const historyData = ref<PluginHistoryData[]>([]);
 const isLoading = ref(true);
 const chartRef = ref();
 
-const currentRange = ref<string>((page.props.ziggy as { query?: Record<string, string> })?.query?.range ?? 'all');
+function toDateInputValue(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+const initialQuery = new URLSearchParams(page.url.split('?')[1] ?? '');
+const currentRange = ref<string>(initialQuery.get('range') ?? 'custom');
+
+const today = new Date();
+const monthAgo = new Date(today);
+monthAgo.setMonth(monthAgo.getMonth() - 1);
+
+const customFrom = ref<string>(
+    initialQuery.get('fromdate') ?? toDateInputValue(monthAgo),
+);
+const customTo = ref<string>(
+    initialQuery.get('todate') ?? toDateInputValue(today),
+);
 
 const chartData = ref({
     labels: [] as string[],
@@ -94,7 +122,10 @@ async function fetchHistory(): Promise<void> {
     isLoading.value = true;
     try {
         const params: Record<string, string> = {};
-        if (currentRange.value && currentRange.value !== 'all') {
+        if (currentRange.value === 'custom') {
+            params['fromdate'] = customFrom.value;
+            params['todate'] = customTo.value;
+        } else if (currentRange.value && currentRange.value !== 'all') {
             params['range'] = currentRange.value;
         }
         const queryString = new URLSearchParams(params).toString();
@@ -104,7 +135,9 @@ async function fetchHistory(): Promise<void> {
         historyData.value = json.data ?? [];
         const includeTime = currentRange.value === 'day';
         chartData.value = {
-            labels: historyData.value.map((d) => formatChartDate(d.date, includeTime)),
+            labels: historyData.value.map((d) =>
+                formatChartDate(d.date, includeTime),
+            ),
             datasets: [
                 {
                     label: 'Install Count Over Time',
@@ -128,6 +161,29 @@ function setRange(range: string): void {
     router.get(
         show.url(props.plugin.name),
         { range },
+        { preserveState: true, preserveScroll: true },
+    );
+    fetchHistory();
+}
+
+function selectCustomRange(): void {
+    if (currentRange.value === 'custom') {
+        return;
+    }
+    applyCustomRange();
+}
+
+function applyCustomRange(): void {
+    if (!customFrom.value || !customTo.value) {
+        return;
+    }
+    if (customFrom.value > customTo.value) {
+        [customFrom.value, customTo.value] = [customTo.value, customFrom.value];
+    }
+    currentRange.value = 'custom';
+    router.get(
+        show.url(props.plugin.name),
+        { range: 'custom', fromdate: customFrom.value, todate: customTo.value },
         { preserveState: true, preserveScroll: true },
     );
     fetchHistory();
@@ -185,23 +241,36 @@ onUnmounted(() => {
             <div class="plugin-detail__stats">
                 <div class="plugin-detail__stat">
                     <div class="plugin-detail__stat-label">Author</div>
-                    <div class="plugin-detail__stat-value" :title="plugin.author">{{ plugin.author }}</div>
+                    <div
+                        class="plugin-detail__stat-value"
+                        :title="plugin.author"
+                    >
+                        {{ plugin.author }}
+                    </div>
                 </div>
                 <div class="plugin-detail__stat">
                     <div class="plugin-detail__stat-label">Last Update</div>
-                    <div class="plugin-detail__stat-value">{{ formatDate(plugin.updated_on) }}</div>
+                    <div class="plugin-detail__stat-value">
+                        {{ formatDate(plugin.updated_on) }}
+                    </div>
                 </div>
                 <div class="plugin-detail__stat">
                     <div class="plugin-detail__stat-label">All-time High</div>
-                    <div class="plugin-detail__stat-value">{{ formatNumber(plugin.all_time_high) }}</div>
+                    <div class="plugin-detail__stat-value">
+                        {{ formatNumber(plugin.all_time_high) }}
+                    </div>
                 </div>
                 <div class="plugin-detail__stat">
                     <div class="plugin-detail__stat-label">Released On</div>
-                    <div class="plugin-detail__stat-value">{{ formatDate(plugin.created_on) }}</div>
+                    <div class="plugin-detail__stat-value">
+                        {{ formatDate(plugin.created_on) }}
+                    </div>
                 </div>
                 <div class="plugin-detail__stat">
                     <div class="plugin-detail__stat-label">Active Installs</div>
-                    <div class="plugin-detail__stat-value">{{ formatNumber(plugin.current_installs) }}</div>
+                    <div class="plugin-detail__stat-value">
+                        {{ formatNumber(plugin.current_installs) }}
+                    </div>
                 </div>
             </div>
 
@@ -240,20 +309,82 @@ onUnmounted(() => {
                     v-for="range in ranges"
                     :key="range.value"
                     class="plugin-detail__range-btn"
-                    :class="currentRange === range.value ? 'plugin-detail__range-btn--active' : 'plugin-detail__range-btn--inactive'"
+                    :class="
+                        currentRange === range.value
+                            ? 'plugin-detail__range-btn--active'
+                            : 'plugin-detail__range-btn--inactive'
+                    "
                     @click="setRange(range.value)"
                 >
                     {{ range.label }}
                 </button>
+
+                <!-- Custom date range -->
+                <div
+                    class="plugin-detail__date-btn"
+                    :class="
+                        currentRange === 'custom'
+                            ? 'plugin-detail__date-btn--active'
+                            : 'plugin-detail__date-btn--inactive'
+                    "
+                    @click="selectCustomRange"
+                >
+                    <input
+                        v-model="customFrom"
+                        class="plugin-detail__date-input"
+                        type="date"
+                        :max="customTo"
+                        aria-label="History start date"
+                        autocomplete="off"
+                        data-1p-ignore
+                        data-lpignore="true"
+                        data-bwignore
+                        data-form-type="other"
+                        @change="applyCustomRange"
+                    />
+                </div>
+                <div
+                    class="plugin-detail__date-btn"
+                    :class="
+                        currentRange === 'custom'
+                            ? 'plugin-detail__date-btn--active'
+                            : 'plugin-detail__date-btn--inactive'
+                    "
+                    @click="selectCustomRange"
+                >
+                    <input
+                        v-model="customTo"
+                        class="plugin-detail__date-input"
+                        type="date"
+                        :min="customFrom"
+                        aria-label="History end date"
+                        autocomplete="off"
+                        data-1p-ignore
+                        data-lpignore="true"
+                        data-bwignore
+                        data-form-type="other"
+                        @change="applyCustomRange"
+                    />
+                </div>
             </div>
 
             <!-- Chart -->
             <div class="plugin-detail__chart-area">
-                <div
-                    v-if="isLoading"
-                    class="plugin-detail__chart-skeleton"
+                <div v-if="isLoading" class="plugin-detail__chart-skeleton">
+                    <span
+                        class="plugin-detail__chart-spinner"
+                        aria-hidden="true"
+                    />
+                    <span class="plugin-detail__chart-loading-text"
+                        >Loading chart data…</span
+                    >
+                </div>
+                <Line
+                    ref="chartRef"
+                    v-else
+                    :data="chartData"
+                    :options="chartOptions"
                 />
-                <Line ref="chartRef" v-else :data="chartData" :options="chartOptions" />
             </div>
         </div>
     </div>
@@ -288,7 +419,7 @@ onUnmounted(() => {
 }
 
 .plugin-detail__tags {
-    @apply mb-3 break-words text-xs text-gray-400;
+    @apply mb-3 text-xs break-words text-gray-400;
 }
 
 .plugin-detail__stats {
@@ -352,12 +483,57 @@ onUnmounted(() => {
     border-color: rgba(255, 108, 33, 0.3);
 }
 
+.plugin-detail__date-btn {
+    @apply flex cursor-pointer items-center rounded-full px-3 py-1 transition;
+}
+
+.plugin-detail__date-btn--active {
+    @apply text-white;
+    background: #c54704;
+    border: 1px solid #c54704;
+}
+
+.plugin-detail__date-btn--inactive {
+    @apply bg-neutral-800 text-gray-400;
+    border: 1px solid #333;
+}
+
+.plugin-detail__date-btn--inactive:hover {
+    background: #3a2010;
+    color: #ff6c21;
+    border-color: rgba(255, 108, 33, 0.3);
+}
+
+.plugin-detail__date-input {
+    @apply cursor-pointer bg-transparent text-sm;
+    border: none;
+    outline: none;
+    padding: 0;
+    color: inherit;
+    width: 7.5rem;
+    color-scheme: dark;
+}
+
+.plugin-detail__date-input::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+}
+
 .plugin-detail__chart-area {
     @apply relative h-56 sm:h-80;
 }
 
 .plugin-detail__chart-skeleton {
-    @apply h-56 animate-pulse rounded-lg sm:h-80;
+    @apply flex h-56 flex-col items-center justify-center gap-3 rounded-lg sm:h-80;
     background: #222222;
+}
+
+.plugin-detail__chart-spinner {
+    @apply h-8 w-8 animate-spin rounded-full;
+    border: 3px solid rgba(255, 108, 33, 0.2);
+    border-top-color: #ff6c21;
+}
+
+.plugin-detail__chart-loading-text {
+    @apply text-sm text-gray-400;
 }
 </style>

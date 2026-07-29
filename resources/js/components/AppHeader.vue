@@ -86,7 +86,7 @@ async function openMenuForSearch(): Promise<void> {
                 />
                 <div class="app-header__title-group">
                     <span class="app-header__title">RuneLite Plugin Stats</span>
-                    <span class="app-header__version">v0.3.1</span>
+                    <span class="app-header__version">v0.4.0</span>
                 </div>
             </a>
 

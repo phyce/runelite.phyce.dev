@@ -17,7 +17,10 @@ createServer(
             setup: ({ App, props, plugin }) =>
                 createSSRApp({ render: () => h(App, props) }).use(plugin),
         }),
-    { cluster: true },
+    {
+        port: Number(process.env.SSR_PORT ?? 13714),
+        cluster: process.env.SSR_CLUSTER === 'true',
+    },
 );
 
 function resolvePage(name: string) {
