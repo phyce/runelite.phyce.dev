@@ -43,7 +43,7 @@ class HandleInertiaRequests extends Middleware
             'name' => config('app.name'),
             'apiUrl' => rtrim(config('services.runelite_api.client_url'), '/'),
             'appUrl' => config('app.url'),
-            'plugins' => $this->runeliteApi->getPlugins([]),
+            'plugins' => $this->runeliteApi->getClientPlugins([]),
         ];
     }
 }
