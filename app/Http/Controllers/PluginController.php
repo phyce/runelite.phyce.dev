@@ -21,7 +21,7 @@ class PluginController extends Controller
     public function index(Request $request): Response
     {
         $params = $request->only(['range']);
-        $plugins = $this->runeliteApi->getPlugins($params);
+        $plugins = $this->runeliteApi->getClientPlugins($params);
 
         SEOTools::setTitle('RuneLite Plugin Stats — Browse All Plugins');
         SEOTools::setDescription('Browse install counts, all-time highs for every RuneLite plugins.');

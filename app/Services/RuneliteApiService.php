@@ -12,6 +12,26 @@ class RuneliteApiService
     /** @var array{0: array<string, array<mixed>>, 1: array<string, array<mixed>>}|null */
     private ?array $developerLookups = null;
 
+    /**
+     * Fields the browser actually reads off the shared plugin list: the homepage
+     * table and the header search. This list is embedded in every Inertia
+     * response, so anything the client never touches is dead weight on the wire.
+     *
+     * @var list<string>
+     */
+    private const CLIENT_PLUGIN_FIELDS = [
+        'id',
+        'name',
+        'display',
+        'author',
+        'description',
+        'tags',
+        'warning',
+        'updated_on',
+        'all_time_high',
+        'current_installs',
+    ];
+
     public function __construct()
     {
         $this->baseUrl = rtrim(config('services.runelite_api.url'), '/');
@@ -23,6 +43,23 @@ class RuneliteApiService
         return $this->cached('plugins', $params, 60, function () use ($params) {
             return $this->fetch('plugins', $params) ?? [];
         });
+    }
+
+    /**
+     * The plugin list as it is handed to the client, stripped to the fields the
+     * frontend reads. `git_repo`, `support` and `created_on` are only ever read
+     * off the single-plugin and ranking-entry props, never off this list.
+     *
+     * @return array<mixed>
+     */
+    public function getClientPlugins(array $params = []): array
+    {
+        $keep = array_flip(self::CLIENT_PLUGIN_FIELDS);
+
+        return array_map(
+            fn (array $plugin): array => array_intersect_key($plugin, $keep),
+            $this->getPlugins($params),
+        );
     }
 
     /** @return array<mixed>|null */
