@@ -669,7 +669,7 @@ onUnmounted(() => {
 }
 
 .plugin-detail__related-meta {
-    @apply truncate text-xs text-gray-500;
+    @apply truncate text-xs text-gray-400;
 }
 
 .plugin-detail__related-tags {
@@ -684,7 +684,7 @@ onUnmounted(() => {
 }
 
 .plugin-detail__related-reason {
-    @apply mt-0.5 text-xs text-gray-600;
+    @apply mt-0.5 text-xs text-gray-400;
 }
 
 .plugin-detail__developer {
@@ -733,7 +733,7 @@ onUnmounted(() => {
 }
 
 .plugin-detail__dev-stat-label {
-    @apply text-xs text-gray-500;
+    @apply text-xs text-gray-400;
 }
 
 .plugin-detail__contributors {
@@ -742,7 +742,7 @@ onUnmounted(() => {
 }
 
 .plugin-detail__contributors-title {
-    @apply text-xs font-medium uppercase tracking-wider text-gray-500;
+    @apply text-xs font-medium uppercase tracking-wider text-gray-400;
 }
 
 .plugin-detail__contributor-list {
@@ -762,7 +762,7 @@ onUnmounted(() => {
 }
 
 .plugin-detail__contributor-meta {
-    @apply text-xs tabular-nums text-gray-500;
+    @apply text-xs tabular-nums text-gray-400;
 }
 
 .plugin-detail__dev-link {

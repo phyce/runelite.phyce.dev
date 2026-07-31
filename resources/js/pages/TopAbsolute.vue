@@ -73,7 +73,7 @@ const rows = computed((): GrowthEntry[] => props.entries ?? []);
                         <th scope="col" class="top-absolute__head-cell">Plugin</th>
                         <th scope="col" class="top-absolute__head-cell top-absolute__head-cell--num">Installs</th>
                         <th scope="col" class="top-absolute__head-cell top-absolute__head-cell--num">% Change</th>
-                        <th scope="col" class="top-absolute__head-cell"></th>
+                        <th scope="col" class="top-absolute__head-cell"><span class="top-absolute__head-cell-label">Stats</span></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -206,7 +206,7 @@ const rows = computed((): GrowthEntry[] => props.entries ?? []);
 }
 
 .top-absolute__head-cell {
-    @apply px-2 py-2 text-xs font-medium uppercase tracking-wider text-gray-500 sm:px-4 sm:py-3;
+    @apply px-2 py-2 text-xs font-medium uppercase tracking-wider text-gray-400 sm:px-4 sm:py-3;
 }
 
 .top-absolute__head-cell--rank {
@@ -307,5 +307,9 @@ const rows = computed((): GrowthEntry[] => props.entries ?? []);
     background: #c54704;
     border-color: #c54704;
     color: #fff;
+}
+
+.top-absolute__head-cell-label {
+    @apply sr-only;
 }
 </style>

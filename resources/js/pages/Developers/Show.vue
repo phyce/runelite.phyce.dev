@@ -184,7 +184,7 @@ function coauthorLabel(entry: DeveloperPluginEntry): string | null {
 }
 
 .dev-profile__aliases {
-    @apply text-xs text-gray-500;
+    @apply text-xs text-gray-400;
 }
 
 .dev-profile__figures {
@@ -196,7 +196,7 @@ function coauthorLabel(entry: DeveloperPluginEntry): string | null {
 }
 
 .dev-profile__figure-label {
-    @apply text-xs font-medium uppercase tracking-wider text-gray-500;
+    @apply text-xs font-medium uppercase tracking-wider text-gray-400;
 }
 
 .dev-profile__figure-value {
@@ -204,7 +204,7 @@ function coauthorLabel(entry: DeveloperPluginEntry): string | null {
 }
 
 .dev-profile__figure-value--peak {
-    @apply text-gray-500;
+    @apply text-gray-400;
 }
 
 .dev-profile__facts {
@@ -217,7 +217,7 @@ function coauthorLabel(entry: DeveloperPluginEntry): string | null {
 }
 
 .dev-profile__fact-label {
-    @apply text-xs font-medium text-gray-500;
+    @apply text-xs font-medium text-gray-400;
 }
 
 .dev-profile__fact-value {
@@ -225,7 +225,7 @@ function coauthorLabel(entry: DeveloperPluginEntry): string | null {
 }
 
 .dev-profile__fact-note {
-    @apply truncate text-xs text-gray-500;
+    @apply truncate text-xs text-gray-400;
 }
 
 .dev-profile__fact-link {
@@ -261,7 +261,7 @@ function coauthorLabel(entry: DeveloperPluginEntry): string | null {
 }
 
 .dev-profile__card-count {
-    @apply text-xs font-medium tabular-nums text-gray-600;
+    @apply text-xs font-medium tabular-nums text-gray-400;
 }
 
 .dev-profile__table-wrapper {
@@ -293,7 +293,7 @@ function coauthorLabel(entry: DeveloperPluginEntry): string | null {
 }
 
 .dev-profile__th {
-    @apply px-3 py-2 text-xs font-medium uppercase tracking-wider text-gray-500 sm:px-4;
+    @apply px-3 py-2 text-xs font-medium uppercase tracking-wider text-gray-400 sm:px-4;
     white-space: nowrap;
 }
 
@@ -325,7 +325,7 @@ function coauthorLabel(entry: DeveloperPluginEntry): string | null {
 }
 
 .dev-profile__td--muted {
-    @apply font-normal text-gray-500;
+    @apply font-normal text-gray-400;
 }
 
 .dev-profile__td--action {
@@ -343,7 +343,7 @@ function coauthorLabel(entry: DeveloperPluginEntry): string | null {
 }
 
 .dev-profile__plugin-coauthors {
-    @apply text-xs text-gray-600;
+    @apply text-xs text-gray-400;
 }
 
 .dev-profile__link-btn {

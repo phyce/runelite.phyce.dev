@@ -110,7 +110,7 @@ const columns: { field: SortField; label: string }[] = [
                         {{ col.label }}
                         <span :class="sortField === col.field ? 'plugin-table__sort--active' : 'plugin-table__sort--inactive'">{{ sortIndicator(col.field) }}</span>
                     </th>
-                    <th scope="col" class="plugin-table__head-cell"></th>
+                    <th scope="col" class="plugin-table__head-cell"><span class="plugin-table__head-cell-label">Stats</span></th>
                 </tr>
             </thead>
             <tbody>
@@ -169,7 +169,7 @@ const columns: { field: SortField; label: string }[] = [
 }
 
 .plugin-table__head-cell {
-    @apply px-4 py-3 text-xs font-medium uppercase tracking-wider text-gray-500;
+    @apply px-4 py-3 text-xs font-medium uppercase tracking-wider text-gray-400;
     white-space: nowrap;
 }
 
@@ -238,7 +238,7 @@ const columns: { field: SortField; label: string }[] = [
 }
 
 .plugin-table__author {
-    @apply ml-1.5 text-xs text-gray-500;
+    @apply ml-1.5 text-xs text-gray-400;
 }
 
 .plugin-table__stats-link {
@@ -275,5 +275,9 @@ const columns: { field: SortField; label: string }[] = [
 
 .plugin-table__scrollbar-spacer {
     @apply h-px;
+}
+
+.plugin-table__head-cell-label {
+    @apply sr-only;
 }
 </style>

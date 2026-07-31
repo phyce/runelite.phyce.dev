@@ -77,7 +77,7 @@ const rows = computed((): DeveloperRankEntry[] => props.rankings?.entries ?? [])
                         <th scope="col" class="dev-popular__head-cell dev-popular__head-cell--num">Plugins</th>
                         <th scope="col" class="dev-popular__head-cell dev-popular__head-cell--num" title="Peak installs yesterday">{{ growthLabel }}</th>
                         <th scope="col" class="dev-popular__head-cell dev-popular__head-cell--num">% Change</th>
-                        <th scope="col" class="dev-popular__head-cell"></th>
+                        <th scope="col" class="dev-popular__head-cell"><span class="dev-popular__head-cell-label">Profile</span></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -200,7 +200,7 @@ const rows = computed((): DeveloperRankEntry[] => props.rankings?.entries ?? [])
 }
 
 .dev-popular__head-cell {
-    @apply px-2 py-2 text-xs font-medium uppercase tracking-wider text-gray-500 sm:px-4 sm:py-3;
+    @apply px-2 py-2 text-xs font-medium uppercase tracking-wider text-gray-400 sm:px-4 sm:py-3;
     white-space: nowrap;
 }
 
@@ -283,7 +283,7 @@ const rows = computed((): DeveloperRankEntry[] => props.rankings?.entries ?? [])
 }
 
 .dev-popular__installs-total-sub {
-    @apply text-xs tabular-nums text-gray-500;
+    @apply text-xs tabular-nums text-gray-400;
 }
 
 .dev-popular__pct {
@@ -295,7 +295,7 @@ const rows = computed((): DeveloperRankEntry[] => props.rankings?.entries ?? [])
 }
 
 .dev-popular__pct-base {
-    @apply text-xs tabular-nums text-gray-500;
+    @apply text-xs tabular-nums text-gray-400;
 }
 
 .dev-popular__profile-link {
@@ -309,5 +309,9 @@ const rows = computed((): DeveloperRankEntry[] => props.rankings?.entries ?? [])
     background: #c54704;
     border-color: #c54704;
     color: #fff;
+}
+
+.dev-popular__head-cell-label {
+    @apply sr-only;
 }
 </style>

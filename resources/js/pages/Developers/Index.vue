@@ -127,7 +127,7 @@ const columns: { field: SortField; label: string; numeric: boolean; title?: stri
                             {{ col.label }}
                             <span :class="sortField === col.field ? 'developers__sort--active' : 'developers__sort--inactive'">{{ sortIndicator(col.field) }}</span>
                         </th>
-                        <th scope="col" class="developers__head-cell"></th>
+                        <th scope="col" class="developers__head-cell"><span class="developers__head-cell-label">Profile</span></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -186,7 +186,7 @@ const columns: { field: SortField; label: string; numeric: boolean; title?: stri
 }
 
 .developers__count {
-    @apply flex-shrink-0 text-xs tabular-nums text-gray-500;
+    @apply flex-shrink-0 text-xs tabular-nums text-gray-400;
 }
 
 .developers__empty {
@@ -222,7 +222,7 @@ const columns: { field: SortField; label: string; numeric: boolean; title?: stri
 }
 
 .developers__head-cell {
-    @apply px-2 py-2 text-xs font-medium uppercase tracking-wider text-gray-500 sm:px-4 sm:py-3;
+    @apply px-2 py-2 text-xs font-medium uppercase tracking-wider text-gray-400 sm:px-4 sm:py-3;
     white-space: nowrap;
 }
 
@@ -315,5 +315,9 @@ const columns: { field: SortField; label: string; numeric: boolean; title?: stri
     background: #c54704;
     border-color: #c54704;
     color: #fff;
+}
+
+.developers__head-cell-label {
+    @apply sr-only;
 }
 </style>
