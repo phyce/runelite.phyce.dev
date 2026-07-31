@@ -19,8 +19,21 @@ class CacheResponse
             return $response;
         }
 
-        $inertiaHeader = $request->header('X-Inertia', '');
-        $cacheKey = 'response:'.md5($request->fullUrl().$inertiaHeader);
+        /**
+         * Every header that changes which props end up in the body has to be
+         * part of the key. Partial and once-prop requests hit the same URL with
+         * the same `X-Inertia: true` as a full visit, so keying on those two
+         * alone would let a partial response containing a single prop be served
+         * as though it were the whole page.
+         */
+        $cacheKey = 'response:'.md5(implode('|', [
+            $request->fullUrl(),
+            $request->header('X-Inertia', ''),
+            $request->header('X-Inertia-Partial-Component', ''),
+            $request->header('X-Inertia-Partial-Data', ''),
+            $request->header('X-Inertia-Partial-Except', ''),
+            $request->header('X-Inertia-Except-Once-Props', ''),
+        ]));
 
         $cached = Cache::get($cacheKey);
 

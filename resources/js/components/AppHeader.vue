@@ -29,6 +29,15 @@ function isActive(link: { href: string; exact: boolean }): boolean {
     return currentPath.value.startsWith(link.href);
 }
 
+/**
+ * The plugin list is a deferred prop, so it is absent from the initial document
+ * and arrives shortly after paint. Until then the box takes input but has
+ * nothing to match against, which would otherwise look like "no results".
+ */
+const pluginsLoaded = computed(() => Array.isArray(page.props.plugins));
+
+const searchPending = computed(() => searchInput.value.trim().length > 0 && !pluginsLoaded.value);
+
 const searchResults = computed(() => {
     const q = searchInput.value.trim();
     if (!q) return [];
@@ -114,7 +123,10 @@ async function openMenuForSearch(): Promise<void> {
                         @focus="searchVisible = true"
                         @blur="onBlur"
                     />
-                    <div v-if="searchVisible && searchResults.length > 0" class="app-header__search-results">
+                    <div v-if="searchVisible && searchPending" class="app-header__search-results">
+                        <span class="app-header__search-pending">Loading plugins…</span>
+                    </div>
+                    <div v-else-if="searchVisible && searchResults.length > 0" class="app-header__search-results">
                         <a
                             v-for="plugin in searchResults"
                             :key="plugin.id"
@@ -199,7 +211,10 @@ async function openMenuForSearch(): Promise<void> {
                             @blur="onBlur"
                         />
                     </div>
-                    <div v-if="searchResults.length > 0" class="app-header__drawer-results">
+                    <div v-if="searchPending" class="app-header__drawer-results">
+                        <span class="app-header__search-pending">Loading plugins…</span>
+                    </div>
+                    <div v-else-if="searchResults.length > 0" class="app-header__drawer-results">
                         <a
                             v-for="plugin in searchResults"
                             :key="plugin.id"
@@ -302,6 +317,10 @@ async function openMenuForSearch(): Promise<void> {
 
 .app-header__search-result + .app-header__search-result {
     @apply border-t border-neutral-800;
+}
+
+.app-header__search-pending {
+    @apply block px-3 py-2.5 text-sm text-gray-400;
 }
 
 .app-header__search-result-name {
