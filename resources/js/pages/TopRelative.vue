@@ -28,35 +28,6 @@ function setPeriod(period: string): void {
     router.get('/top/relative', { period }, { preserveState: true, preserveScroll: true });
 }
 
-type SortField = 'rank' | 'name' | 'pct_growth' | 'absolute_growth';
-type SortDirection = 'asc' | 'desc';
-
-const sortField = ref<SortField>('pct_growth');
-const sortDirection = ref<SortDirection>('desc');
-
-function handleSort(field: SortField): void {
-    if (sortField.value === field) {
-        sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc';
-    } else {
-        sortField.value = field;
-        sortDirection.value = 'desc';
-    }
-}
-
-function sortIndicator(field: SortField): string {
-    if (sortField.value !== field) return '↕';
-    return sortDirection.value === 'asc' ? '↑' : '↓';
-}
-
-function getValue(entry: GrowthEntry, field: SortField): string | number {
-    switch (field) {
-        case 'rank': return entry.rank;
-        case 'name': return (entry.plugin.display || entry.plugin.name).toLowerCase();
-        case 'pct_growth': return entry.pct_growth;
-        case 'absolute_growth': return entry.absolute_growth;
-    }
-}
-
 function hasWindowBaseline(entry: GrowthEntry): boolean {
     if (!entry.plugin.created_on || !entry.window_start) {
         return true;
@@ -64,20 +35,7 @@ function hasWindowBaseline(entry: GrowthEntry): boolean {
     return new Date(entry.plugin.created_on) <= new Date(entry.window_start);
 }
 
-const sortedEntries = computed(() => {
-    if (!props.entries) {
-        return [];
-    }
-    return [...props.entries].sort((a, b) => {
-        const va = getValue(a, sortField.value);
-        const vb = getValue(b, sortField.value);
-        const dir = sortDirection.value === 'asc' ? 1 : -1;
-        if (typeof va === 'number' && typeof vb === 'number') {
-            return (va - vb) * dir;
-        }
-        return String(va).localeCompare(String(vb)) * dir;
-    });
-});
+const rows = computed((): GrowthEntry[] => props.entries ?? []);
 </script>
 
 <template>
@@ -103,7 +61,7 @@ const sortedEntries = computed(() => {
             </div>
         </div>
 
-        <div v-if="!sortedEntries.length" class="top-relative__empty">
+        <div v-if="!rows.length" class="top-relative__empty">
             <p>Growth data is not yet available for this period. Check back soon.</p>
         </div>
 
@@ -111,44 +69,16 @@ const sortedEntries = computed(() => {
             <table class="top-relative__table">
                 <thead class="top-relative__head">
                     <tr>
-                        <th
-                            scope="col"
-                            class="top-relative__head-cell top-relative__head-cell--rank top-relative__head-cell--sortable"
-                            @click="handleSort('rank')"
-                        >
-                            #
-                            <span :class="sortField === 'rank' ? 'top-relative__sort--active' : 'top-relative__sort--inactive'">{{ sortIndicator('rank') }}</span>
-                        </th>
-                        <th
-                            scope="col"
-                            class="top-relative__head-cell top-relative__head-cell--sortable"
-                            @click="handleSort('name')"
-                        >
-                            Plugin
-                            <span :class="sortField === 'name' ? 'top-relative__sort--active' : 'top-relative__sort--inactive'">{{ sortIndicator('name') }}</span>
-                        </th>
-                        <th
-                            scope="col"
-                            class="top-relative__head-cell top-relative__head-cell--num top-relative__head-cell--sortable"
-                            @click="handleSort('pct_growth')"
-                        >
-                            % Change
-                            <span :class="sortField === 'pct_growth' ? 'top-relative__sort--active' : 'top-relative__sort--inactive'">{{ sortIndicator('pct_growth') }}</span>
-                        </th>
-                        <th
-                            scope="col"
-                            class="top-relative__head-cell top-relative__head-cell--num top-relative__head-cell--sortable"
-                            @click="handleSort('absolute_growth')"
-                        >
-                            Installs
-                            <span :class="sortField === 'absolute_growth' ? 'top-relative__sort--active' : 'top-relative__sort--inactive'">{{ sortIndicator('absolute_growth') }}</span>
-                        </th>
+                        <th scope="col" class="top-relative__head-cell top-relative__head-cell--rank">#</th>
+                        <th scope="col" class="top-relative__head-cell">Plugin</th>
+                        <th scope="col" class="top-relative__head-cell top-relative__head-cell--num">% Change</th>
+                        <th scope="col" class="top-relative__head-cell top-relative__head-cell--num">Installs</th>
                         <th scope="col" class="top-relative__head-cell"></th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr
-                        v-for="(entry, index) in sortedEntries"
+                        v-for="(entry, index) in rows"
                         :key="entry.plugin.id"
                         class="top-relative__row"
                         :class="index % 2 === 0 ? 'top-relative__row--even' : 'top-relative__row--odd'"
@@ -288,22 +218,6 @@ const sortedEntries = computed(() => {
     @apply text-right;
     width: 1%;
     white-space: nowrap;
-}
-
-.top-relative__head-cell--sortable {
-    @apply cursor-pointer select-none;
-}
-
-.top-relative__head-cell--sortable:hover {
-    color: #ff6c21;
-}
-
-.top-relative__sort--active {
-    color: #ff6c21;
-}
-
-.top-relative__sort--inactive {
-    @apply text-gray-700;
 }
 
 /* ── Rows ── */

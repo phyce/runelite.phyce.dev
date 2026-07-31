@@ -21,6 +21,19 @@ export function formatNumber(num: number): string {
     return num.toLocaleString('en-US');
 }
 
+/** Signs and rounds an API percentage (already 0..100 scaled), e.g. 41432.11 → "+41,432%". */
+export function formatSignedPercent(pct: number): string {
+    const body =
+        Math.abs(pct) >= 100
+            ? Math.round(pct).toLocaleString('en-US')
+            : pct.toFixed(1);
+    return `${pct >= 0 ? '+' : ''}${body}%`;
+}
+
+export function formatSignedNumber(num: number): string {
+    return `${num >= 0 ? '+' : ''}${num.toLocaleString('en-US')}`;
+}
+
 export function truncateString(str: string, num: number): string {
     if (str.length <= num) {
         return str;

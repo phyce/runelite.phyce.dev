@@ -11,11 +11,12 @@ import {
     Title,
     Tooltip,
 } from 'chart.js';
-import { onMounted, onUnmounted, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { Line } from 'vue-chartjs';
+import { show as developerShow } from '@/actions/App/Http/Controllers/DeveloperController';
 import { show } from '@/actions/App/Http/Controllers/PluginController';
 import AppLayout from '@/layouts/AppLayout.vue';
-import type { Plugin, PluginHistoryData } from '@/types';
+import type { Plugin, PluginDeveloper, PluginHistoryData, RelatedPlugins } from '@/types';
 import { formatChartDate, formatDate, formatNumber } from '@/utils/formatting';
 
 ChartJS.register(
@@ -33,7 +34,20 @@ defineOptions({ layout: AppLayout });
 
 const props = defineProps<{
     plugin: Plugin;
+    related: RelatedPlugins | null;
+    developers: PluginDeveloper[];
 }>();
+
+const relatedEntries = computed(() => props.related?.entries ?? []);
+
+const mainDeveloper = computed((): PluginDeveloper | null => props.developers[0] ?? null);
+const contributors = computed((): PluginDeveloper[] => props.developers.slice(1));
+
+const relatedHeading = computed(() =>
+    relatedEntries.value.every((entry) => entry.reason === 'author')
+        ? 'More from this developer'
+        : 'Related plugins',
+);
 
 const page = usePage<{ apiUrl: string }>();
 const historyData = ref<PluginHistoryData[]>([]);
@@ -387,6 +401,87 @@ onUnmounted(() => {
                 />
             </div>
         </div>
+
+        <div v-if="relatedEntries.length" class="plugin-detail__related">
+            <h2 class="plugin-detail__related-title">{{ relatedHeading }}</h2>
+            <div class="plugin-detail__related-grid">
+                <a
+                    v-for="entry in relatedEntries"
+                    :key="entry.plugin.id"
+                    :href="show.url(entry.plugin.name)"
+                    class="plugin-detail__related-card"
+                >
+                    <span class="plugin-detail__related-name">{{ entry.plugin.display || entry.plugin.name }}</span>
+                    <span class="plugin-detail__related-meta">
+                        {{ formatNumber(entry.plugin.current_installs) }} installs
+                        <template v-if="entry.plugin.author">· by {{ entry.plugin.author }}</template>
+                    </span>
+                    <span v-if="entry.shared_tags?.length" class="plugin-detail__related-tags">
+                        <span v-for="tag in entry.shared_tags" :key="tag" class="plugin-detail__related-tag">{{ tag }}</span>
+                    </span>
+                    <span v-else-if="entry.reason === 'author'" class="plugin-detail__related-reason">same developer</span>
+                </a>
+            </div>
+        </div>
+
+        <aside v-if="mainDeveloper" class="plugin-detail__developer">
+            <h2 class="plugin-detail__developer-title">Developer</h2>
+
+            <div class="plugin-detail__dev-head">
+                <a
+                    v-if="mainDeveloper.slug"
+                    :href="developerShow.url(mainDeveloper.slug)"
+                    class="plugin-detail__dev-name"
+                >{{ mainDeveloper.name }}</a>
+                <span v-else class="plugin-detail__dev-name plugin-detail__dev-name--plain">{{ mainDeveloper.name }}</span>
+            </div>
+
+            <div v-if="mainDeveloper.total_installs !== null" class="plugin-detail__dev-stats">
+                <div class="plugin-detail__dev-stat" title="Peak installs yesterday across their plugins">
+                    <span class="plugin-detail__dev-stat-value">{{ formatNumber(mainDeveloper.total_installs) }}</span>
+                    <span class="plugin-detail__dev-stat-label">installs</span>
+                </div>
+                <div class="plugin-detail__dev-stat">
+                    <span class="plugin-detail__dev-stat-value">{{ formatNumber(mainDeveloper.plugin_count ?? 0) }}</span>
+                    <span class="plugin-detail__dev-stat-label">{{ mainDeveloper.plugin_count === 1 ? 'plugin' : 'plugins' }}</span>
+                </div>
+                <div v-if="mainDeveloper.contributing_since" class="plugin-detail__dev-stat">
+                    <span class="plugin-detail__dev-stat-value plugin-detail__dev-stat-value--date">
+                        {{ formatDate(mainDeveloper.contributing_since) }}
+                    </span>
+                    <span class="plugin-detail__dev-stat-label">publishing since</span>
+                </div>
+            </div>
+
+            <div v-if="contributors.length" class="plugin-detail__contributors">
+                <h3 class="plugin-detail__contributors-title">
+                    {{ contributors.length === 1 ? 'Contributor' : 'Contributors' }}
+                </h3>
+                <ul class="plugin-detail__contributor-list">
+                    <li v-for="contributor in contributors" :key="contributor.name" class="plugin-detail__contributor">
+                        <a
+                            v-if="contributor.slug"
+                            :href="developerShow.url(contributor.slug)"
+                            class="plugin-detail__contributor-name"
+                        >{{ contributor.name }}</a>
+                        <span v-else class="plugin-detail__contributor-name plugin-detail__contributor-name--plain">
+                            {{ contributor.name }}
+                        </span>
+                        <span v-if="contributor.total_installs !== null" class="plugin-detail__contributor-meta">
+                            {{ formatNumber(contributor.total_installs) }} installs ·
+                            {{ formatNumber(contributor.plugin_count ?? 0) }}
+                            {{ contributor.plugin_count === 1 ? 'plugin' : 'plugins' }}
+                        </span>
+                    </li>
+                </ul>
+            </div>
+
+            <a
+                v-if="mainDeveloper.slug"
+                :href="developerShow.url(mainDeveloper.slug)"
+                class="plugin-detail__dev-link"
+            >View profile</a>
+        </aside>
     </div>
 </template>
 
@@ -398,7 +493,7 @@ onUnmounted(() => {
 }
 
 .plugin-detail__info {
-    @apply p-4 sm:rounded-lg sm:p-6 lg:w-1/2;
+    @apply p-4 sm:rounded-lg sm:p-6;
     background: #141414;
     border-top: 1px solid #2a2a2a;
     border-bottom: 1px solid #2a2a2a;
@@ -535,5 +630,170 @@ onUnmounted(() => {
 
 .plugin-detail__chart-loading-text {
     @apply text-sm text-gray-400;
+}
+
+.plugin-detail__related {
+    @apply flex flex-col gap-3 p-4 sm:rounded-lg sm:p-4;
+    background: #141414;
+    border-top: 1px solid #2a2a2a;
+    border-bottom: 1px solid #2a2a2a;
+}
+
+@media (min-width: 640px) {
+    .plugin-detail__related {
+        border: 1px solid #2a2a2a;
+    }
+}
+
+.plugin-detail__related-title {
+    @apply text-sm font-semibold uppercase tracking-widest text-gray-400;
+}
+
+.plugin-detail__related-grid {
+    @apply grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3;
+}
+
+.plugin-detail__related-card {
+    @apply flex flex-col gap-1 rounded-lg p-3 transition-colors duration-100;
+    background: #1c1c1c;
+    border: 1px solid #2a2a2a;
+}
+
+.plugin-detail__related-card:hover {
+    background: #3a2010;
+    border-color: rgba(255, 108, 33, 0.4);
+}
+
+.plugin-detail__related-name {
+    @apply truncate text-sm font-medium text-orange-400;
+}
+
+.plugin-detail__related-meta {
+    @apply truncate text-xs text-gray-500;
+}
+
+.plugin-detail__related-tags {
+    @apply mt-0.5 flex flex-wrap gap-1;
+}
+
+.plugin-detail__related-tag {
+    @apply rounded-full px-2 py-0.5 text-xs;
+    background: rgba(197, 71, 4, 0.18);
+    border: 1px solid rgba(255, 108, 33, 0.3);
+    color: #fb923c;
+}
+
+.plugin-detail__related-reason {
+    @apply mt-0.5 text-xs text-gray-600;
+}
+
+.plugin-detail__developer {
+    @apply flex flex-col gap-4 p-4 sm:rounded-lg sm:p-6;
+    background: #141414;
+    border-top: 1px solid #2a2a2a;
+    border-bottom: 1px solid #2a2a2a;
+}
+
+@media (min-width: 640px) {
+    .plugin-detail__developer {
+        border: 1px solid #2a2a2a;
+    }
+}
+
+.plugin-detail__developer-title {
+    @apply text-sm font-semibold uppercase tracking-widest text-gray-400;
+}
+
+.plugin-detail__dev-head {
+    @apply flex flex-wrap items-baseline gap-x-3 gap-y-1;
+}
+
+.plugin-detail__dev-name {
+    @apply text-xl font-semibold tracking-tight text-orange-500 transition-colors duration-100 hover:text-orange-400 sm:text-2xl;
+}
+
+.plugin-detail__dev-name--plain {
+    @apply text-gray-200;
+}
+
+.plugin-detail__dev-stats {
+    @apply flex flex-wrap gap-x-8 gap-y-3;
+}
+
+.plugin-detail__dev-stat {
+    @apply flex min-w-0 flex-col;
+}
+
+.plugin-detail__dev-stat-value {
+    @apply text-lg font-bold tabular-nums text-gray-100;
+}
+
+.plugin-detail__dev-stat-value--date {
+    @apply text-base font-semibold;
+}
+
+.plugin-detail__dev-stat-label {
+    @apply text-xs text-gray-500;
+}
+
+.plugin-detail__contributors {
+    @apply flex flex-col gap-2 border-t pt-3;
+    border-color: #2a2a2a;
+}
+
+.plugin-detail__contributors-title {
+    @apply text-xs font-medium uppercase tracking-wider text-gray-500;
+}
+
+.plugin-detail__contributor-list {
+    @apply flex flex-col gap-1.5;
+}
+
+.plugin-detail__contributor {
+    @apply flex flex-wrap items-baseline gap-x-2;
+}
+
+.plugin-detail__contributor-name {
+    @apply text-sm font-medium text-orange-400 transition-colors duration-100 hover:text-orange-300;
+}
+
+.plugin-detail__contributor-name--plain {
+    @apply text-gray-300;
+}
+
+.plugin-detail__contributor-meta {
+    @apply text-xs tabular-nums text-gray-500;
+}
+
+.plugin-detail__dev-link {
+    @apply mt-auto self-start rounded-full border border-orange-600 px-4 py-1 text-sm text-orange-400 transition hover:bg-orange-600 hover:text-white;
+}
+
+/* ── Desktop layout: developer card fills the space beside the info card ── */
+
+@media (min-width: 1024px) {
+    .plugin-detail {
+        @apply grid grid-cols-2;
+    }
+
+    .plugin-detail__info {
+        grid-column: 1;
+        grid-row: 1;
+    }
+
+    .plugin-detail__developer {
+        grid-column: 2;
+        grid-row: 1;
+    }
+
+    .plugin-detail__chart-card {
+        grid-column: 1 / -1;
+        grid-row: 2;
+    }
+
+    .plugin-detail__related {
+        grid-column: 1 / -1;
+        grid-row: 3;
+    }
 }
 </style>

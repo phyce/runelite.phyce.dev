@@ -12,6 +12,9 @@ use Inertia\Response;
 
 class MetricsController extends Controller
 {
+    /** @var list<string> */
+    private const PERIODS = ['24h', '7d', '30d', '180d', '1y'];
+
     public function __construct(private RuneliteApiService $runeliteApi) {}
 
     public function top100(): Response
@@ -72,7 +75,7 @@ class MetricsController extends Controller
 
     public function topAbsolute(Request $request): Response
     {
-        $period = $request->query('period', '30d');
+        $period = $this->resolvePeriod($request);
         $data = $this->runeliteApi->getTopAbsolute($period);
 
         SEOTools::setTitle('Most Popular RuneLite Plugins | RuneLite Plugin Stats');
@@ -96,7 +99,7 @@ class MetricsController extends Controller
 
     public function topRelative(Request $request): Response
     {
-        $period = $request->query('period', '30d');
+        $period = $this->resolvePeriod($request);
         $data = $this->runeliteApi->getTopRelative($period);
 
         SEOTools::setTitle('Fastest Growing RuneLite Plugins | RuneLite Plugin Stats');
@@ -116,5 +119,17 @@ class MetricsController extends Controller
             'entries' => $data,
             'period' => $period,
         ]);
+    }
+
+    /**
+     * The `getParams` cookie carries `period` across every page, so these can be handed a window
+     * from the developer pages ("month", "year", …), which the plugin endpoints reject outright.
+     * Anything that is not one of our own windows falls back to the 30 day default.
+     */
+    private function resolvePeriod(Request $request): string
+    {
+        $period = $request->query('period', '30d');
+
+        return in_array($period, self::PERIODS, true) ? $period : '30d';
     }
 }

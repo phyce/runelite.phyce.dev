@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
+import { index as developersIndex } from '@/actions/App/Http/Controllers/DeveloperController';
 
 const page = usePage();
 
@@ -9,15 +10,16 @@ const links = [
     { href: '/top', label: 'Top', exact: true },
     { href: '/top/absolute', label: 'Most Popular', exact: false },
     { href: '/top/relative', label: 'Fastest Growing', exact: false },
+    { href: developersIndex.url(), label: 'Developers', exact: false },
 ];
 
 const currentPath = computed(() => new URL(page.url, 'http://x').pathname);
 
-function isActive(href: string, exact: boolean): boolean {
-    if (exact) {
-        return currentPath.value === href;
+function isActive(link: { href: string; exact: boolean }): boolean {
+    if (link.exact) {
+        return currentPath.value === link.href;
     }
-    return currentPath.value.startsWith(href);
+    return currentPath.value.startsWith(link.href);
 }
 </script>
 
@@ -29,7 +31,7 @@ function isActive(href: string, exact: boolean): boolean {
                 :key="link.href"
                 :href="link.href"
                 class="app-nav__link"
-                :class="isActive(link.href, link.exact) ? 'app-nav__link--active' : 'app-nav__link--inactive'"
+                :class="isActive(link) ? 'app-nav__link--active' : 'app-nav__link--inactive'"
             >
                 {{ link.label }}
             </a>

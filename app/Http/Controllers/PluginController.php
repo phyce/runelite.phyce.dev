@@ -75,6 +75,8 @@ class PluginController extends Controller
 
         return inertia('PluginDetail', [
             'plugin' => $plugin,
+            'related' => $this->runeliteApi->getRelatedPlugins($name),
+            'developers' => $this->runeliteApi->getPluginDevelopers($plugin['author'] ?? ''),
         ]);
     }
 

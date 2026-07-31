@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { index as developersIndex } from '@/actions/App/Http/Controllers/DeveloperController';
 import { show } from '@/actions/App/Http/Controllers/PluginController';
 import { scoreSearchResult } from '@/utils/formatting';
 import type { Plugin } from '@/types';
@@ -18,13 +19,14 @@ const links = [
     { href: '/top', label: 'Top', exact: true },
     { href: '/top/absolute', label: 'Most Popular', exact: false },
     { href: '/top/relative', label: 'Fastest Growing', exact: false },
+    { href: developersIndex.url(), label: 'Developers', exact: false },
 ];
 
 const currentPath = computed(() => new URL(page.url, 'http://x').pathname);
 
-function isActive(href: string, exact: boolean): boolean {
-    if (exact) return currentPath.value === href;
-    return currentPath.value.startsWith(href);
+function isActive(link: { href: string; exact: boolean }): boolean {
+    if (link.exact) return currentPath.value === link.href;
+    return currentPath.value.startsWith(link.href);
 }
 
 const searchResults = computed(() => {
@@ -86,7 +88,7 @@ async function openMenuForSearch(): Promise<void> {
                 />
                 <div class="app-header__title-group">
                     <span class="app-header__title">RuneLite Plugin Stats</span>
-                    <span class="app-header__version">v0.4.0</span>
+                    <span class="app-header__version">v0.5.0</span>
                 </div>
             </a>
 
@@ -173,7 +175,7 @@ async function openMenuForSearch(): Promise<void> {
                         :key="link.href"
                         :href="link.href"
                         class="app-header__drawer-link"
-                        :class="isActive(link.href, link.exact) ? 'app-header__drawer-link--active' : 'app-header__drawer-link--inactive'"
+                        :class="isActive(link) ? 'app-header__drawer-link--active' : 'app-header__drawer-link--inactive'"
                         @click="closeMenu"
                     >
                         {{ link.label }}
