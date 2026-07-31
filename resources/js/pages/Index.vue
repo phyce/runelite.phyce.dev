@@ -1,10 +1,11 @@
 <script setup lang="ts">
+import { Head } from '@inertiajs/vue3';
+import { computed, inject, onMounted, onUnmounted, ref } from 'vue';
 import { show } from '@/actions/App/Http/Controllers/PluginController';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { filterPlugins, pluginSearchKey } from '@/lib/pluginSearch';
 import type { Plugin } from '@/types';
 import { formatDate, truncateString } from '@/utils/formatting';
-import { Head } from '@inertiajs/vue3';
-import { computed, onMounted, onUnmounted, ref } from 'vue';
 
 defineOptions({ layout: AppLayout });
 
@@ -12,6 +13,7 @@ const props = defineProps<{
     plugins: Plugin[];
 }>();
 
+const searchQuery = inject(pluginSearchKey, ref(''));
 
 type SortField = keyof Plugin;
 type SortDirection = 'asc' | 'desc';
@@ -33,6 +35,11 @@ function sortIndicator(field: SortField): string {
     return sortDirection.value === 'asc' ? '↑' : '↓';
 }
 
+function ariaSort(field: SortField): 'ascending' | 'descending' | 'none' {
+    if (sortField.value !== field) return 'none';
+    return sortDirection.value === 'asc' ? 'ascending' : 'descending';
+}
+
 const sortedPlugins = computed(() => {
     return [...props.plugins].sort((a, b) => {
         const valueA = a[sortField.value];
@@ -45,6 +52,8 @@ const sortedPlugins = computed(() => {
             : String(valueB).localeCompare(String(valueA));
     });
 });
+
+const visiblePlugins = computed(() => filterPlugins(sortedPlugins.value, searchQuery.value));
 
 const tableWrapper = ref<HTMLElement>();
 const stickyScrollbar = ref<HTMLElement>();
@@ -97,31 +106,36 @@ const columns: { field: SortField; label: string }[] = [
     <Head title="RuneLite Plugin Stats" />
 
     <div ref="tableWrapper" class="plugin-table__wrapper">
-        <table class="plugin-table">
-            <thead class="plugin-table__head">
-                <tr>
-                    <th
+        <div class="plugin-table" role="table" aria-label="RuneLite plugins">
+            <div class="plugin-table__head" role="rowgroup">
+                <div class="plugin-table__head-row" role="row">
+                    <div
                         v-for="col in columns"
                         :key="col.field"
-                        scope="col"
+                        role="columnheader"
+                        tabindex="0"
                         class="plugin-table__head-cell plugin-table__head-cell--sortable"
+                        :aria-sort="ariaSort(col.field)"
                         @click="handleSort(col.field)"
+                        @keydown.enter.prevent="handleSort(col.field)"
+                        @keydown.space.prevent="handleSort(col.field)"
                     >
                         {{ col.label }}
                         <span :class="sortField === col.field ? 'plugin-table__sort--active' : 'plugin-table__sort--inactive'">{{ sortIndicator(col.field) }}</span>
-                    </th>
-                    <th scope="col" class="plugin-table__head-cell"></th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr
-                    v-for="(plugin, index) in sortedPlugins"
+                    </div>
+                    <div role="columnheader" class="plugin-table__head-cell"><span class="plugin-table__head-cell-label">Stats</span></div>
+                </div>
+            </div>
+            <div class="plugin-table__body" role="rowgroup">
+                <div
+                    v-for="(plugin, index) in visiblePlugins"
                     :key="plugin.id"
+                    role="row"
                     :title="plugin.warning"
                     class="plugin-table__row"
                     :class="index % 2 === 0 ? 'plugin-table__row--even' : 'plugin-table__row--odd'"
                 >
-                    <td class="plugin-table__cell">
+                    <div role="cell" class="plugin-table__cell">
                         <a
                             class="plugin-table__name-link"
                             :href="`https://runelite.net/plugin-hub/show/${plugin.name}`"
@@ -129,18 +143,30 @@ const columns: { field: SortField; label: string }[] = [
                             rel="noopener noreferrer"
                         >{{ plugin.display || plugin.name }}</a>
                         <span v-if="plugin.author" class="plugin-table__author">by {{ plugin.author }}</span>
-                    </td>
-                    <td class="plugin-table__cell plugin-table__cell--num">{{ plugin.current_installs.toLocaleString('en-US') }}</td>
-                    <td class="plugin-table__cell plugin-table__cell--num plugin-table__cell--secondary">{{ plugin.all_time_high.toLocaleString('en-US') }}</td>
-                    <td class="plugin-table__cell plugin-table__cell--desc">{{ truncateString(plugin.description, 100) }}</td>
-                    <td class="plugin-table__cell plugin-table__cell--secondary plugin-table__cell--date">{{ formatDate(plugin.updated_on) }}</td>
-                    <td class="plugin-table__cell plugin-table__cell--action">
+                    </div>
+                    <div role="cell" class="plugin-table__cell plugin-table__cell--num">{{ plugin.current_installs.toLocaleString('en-US') }}</div>
+                    <div role="cell" class="plugin-table__cell plugin-table__cell--num plugin-table__cell--secondary">{{ plugin.all_time_high.toLocaleString('en-US') }}</div>
+                    <div role="cell" class="plugin-table__cell plugin-table__cell--desc">{{ truncateString(plugin.description, 100) }}</div>
+                    <div role="cell" class="plugin-table__cell plugin-table__cell--secondary plugin-table__cell--date">{{ formatDate(plugin.updated_on) }}</div>
+                    <div role="cell" class="plugin-table__cell plugin-table__cell--action">
                         <a :href="show.url(plugin.name)" class="plugin-table__stats-link">Stats</a>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <p v-if="visiblePlugins.length === 0" class="plugin-table__empty">
+            No plugins match “{{ searchQuery.trim() }}”.
+        </p>
     </div>
+
+    <p class="plugin-table__count" aria-live="polite">
+        <template v-if="searchQuery.trim()">
+            Showing {{ visiblePlugins.length.toLocaleString('en-US') }} of
+            {{ sortedPlugins.length.toLocaleString('en-US') }} plugins
+        </template>
+        <template v-else>{{ sortedPlugins.length.toLocaleString('en-US') }} plugins</template>
+    </p>
 
     <div ref="stickyScrollbar" class="plugin-table__scrollbar">
         <div :style="{ width: scrollWidth + 'px' }" class="plugin-table__scrollbar-spacer" />
@@ -159,8 +185,21 @@ const columns: { field: SortField; label: string }[] = [
     display: none;
 }
 
+/*
+ * Grid rather than <table>: content-visibility has no effect on internal table
+ * elements, so rows have to be ordinary grid boxes for the browser to be able
+ * to skip laying out the ones that are off screen.
+ *
+ * Each row carries the column track list itself rather than using `subgrid`.
+ * content-visibility implies layout containment, and containment forces a
+ * subgrid to become an independent grid - the rows would silently lose the
+ * parent's tracks and every cell would take a full row. Repeating an explicit
+ * template keeps the columns aligned precisely because it does not depend on
+ * what any sibling row contains.
+ */
 .plugin-table {
     @apply w-full text-left text-sm;
+    min-width: 57rem;
 }
 
 .plugin-table__head {
@@ -168,13 +207,28 @@ const columns: { field: SortField; label: string }[] = [
     border-bottom: 1px solid #2a2a2a;
 }
 
+.plugin-table__head-row,
+.plugin-table__row {
+    @apply grid items-center;
+    grid-template-columns: minmax(12rem, 2fr) 7rem 9rem minmax(14rem, 3fr) 9.5rem 5.5rem;
+}
+
 .plugin-table__head-cell {
-    @apply px-4 py-3 text-xs font-medium uppercase tracking-wider text-gray-500;
+    @apply px-4 py-3 text-xs font-medium uppercase tracking-wider text-gray-400;
     white-space: nowrap;
 }
 
 .plugin-table__head-cell--sortable {
     @apply cursor-pointer select-none;
+}
+
+.plugin-table__head-cell--sortable:focus-visible {
+    @apply outline-none;
+    box-shadow: inset 0 0 0 2px #ff6c21;
+}
+
+.plugin-table__head-cell-label {
+    @apply sr-only;
 }
 
 .plugin-table__head-cell--sortable:hover {
@@ -189,9 +243,25 @@ const columns: { field: SortField; label: string }[] = [
     @apply text-gray-700;
 }
 
+/*
+ * The list runs to ~2000 rows. `content-visibility: auto` lets the browser skip
+ * style, layout and paint for rows outside the viewport; `contain-intrinsic-size`
+ * supplies the placeholder height so the scrollbar stays honest. The `auto`
+ * keyword means the real height is remembered once a row has been rendered, so
+ * the estimate only has to be close for rows that have never been on screen.
+ */
 .plugin-table__row {
     @apply transition-colors duration-75;
     border-bottom: 1px solid #1e1e1e;
+    content-visibility: auto;
+    contain-intrinsic-size: auto 41px;
+}
+
+/* Rows wrap to three description lines once the grid is horizontally scrolled. */
+@media (max-width: 639px) {
+    .plugin-table__row {
+        contain-intrinsic-size: auto 61px;
+    }
 }
 
 .plugin-table__row--even {
@@ -252,6 +322,14 @@ const columns: { field: SortField; label: string }[] = [
     background: #c54704;
     border-color: #c54704;
     color: #fff;
+}
+
+.plugin-table__empty {
+    @apply px-4 py-10 text-center text-sm text-gray-400;
+}
+
+.plugin-table__count {
+    @apply px-4 py-3 text-xs text-gray-400;
 }
 
 .plugin-table__scrollbar {

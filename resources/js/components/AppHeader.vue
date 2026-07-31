@@ -1,18 +1,20 @@
 <script setup lang="ts">
+import { router, usePage } from '@inertiajs/vue3';
+import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { index as developersIndex } from '@/actions/App/Http/Controllers/DeveloperController';
 import { show } from '@/actions/App/Http/Controllers/PluginController';
-import { scoreSearchResult } from '@/utils/formatting';
+import { pluginSearchKey } from '@/lib/pluginSearch';
 import type { Plugin } from '@/types';
-import { router, usePage } from '@inertiajs/vue3';
-import { computed, nextTick, ref, watch } from 'vue';
+import { scoreSearchResult } from '@/utils/formatting';
 
 const page = usePage<{ plugins?: Plugin[]; apiUrl: string }>();
 const plugins = computed(() => page.props.plugins ?? []);
 
-const searchInput = ref('');
+const searchInput = inject(pluginSearchKey, ref(''));
 const searchVisible = ref(false);
 const menuOpen = ref(false);
 const searchInputRef = ref<HTMLInputElement | null>(null);
+const desktopSearchInputRef = ref<HTMLInputElement | null>(null);
 
 const links = [
     { href: '/', label: 'All Plugins', exact: true },
@@ -29,9 +31,15 @@ function isActive(link: { href: string; exact: boolean }): boolean {
     return currentPath.value.startsWith(link.href);
 }
 
+/**
+ * The homepage renders the whole plugin list itself, so there the query filters
+ * that list in place instead of opening a duplicate dropdown over it.
+ */
+const filtersPageInPlace = computed(() => currentPath.value === '/');
+
 const searchResults = computed(() => {
     const q = searchInput.value.trim();
-    if (!q) return [];
+    if (!q || filtersPageInPlace.value) return [];
     return plugins.value
         .map((p) => ({ ...p, score: scoreSearchResult(p, q) }))
         .filter((p) => p.score > 0)
@@ -73,6 +81,42 @@ async function openMenuForSearch(): Promise<void> {
     await nextTick();
     searchInputRef.value?.focus();
 }
+
+/** The drawer holds the only search box below the `sm` breakpoint. */
+async function focusSearch(): Promise<void> {
+    if (window.matchMedia('(min-width: 640px)').matches) {
+        searchVisible.value = true;
+        await nextTick();
+        desktopSearchInputRef.value?.focus();
+        desktopSearchInputRef.value?.select();
+
+        return;
+    }
+
+    await openMenuForSearch();
+}
+
+/**
+ * Take over find-in-page. Browser find is of limited use here: it only matches
+ * the plugin name and description text that happens to be rendered, whereas the
+ * search box also matches author and tags across every plugin.
+ */
+function onKeydown(event: KeyboardEvent): void {
+    if (event.altKey || !(event.ctrlKey || event.metaKey) || event.key.toLowerCase() !== 'f') {
+        return;
+    }
+
+    event.preventDefault();
+    void focusSearch();
+}
+
+onMounted(() => window.addEventListener('keydown', onKeydown));
+onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
+
+watch(currentPath, () => {
+    searchInput.value = '';
+    searchVisible.value = false;
+});
 </script>
 
 <template>
@@ -105,9 +149,10 @@ async function openMenuForSearch(): Promise<void> {
                         <path fill="currentColor" d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z" />
                     </svg>
                     <input
+                        ref="desktopSearchInputRef"
                         v-model="searchInput"
                         class="app-header__search-input"
-                        placeholder="Search plugins by name, author, tags..."
+                        :placeholder="filtersPageInPlace ? 'Filter plugins by name, author, tags...' : 'Search plugins by name, author, tags...'"
                         type="text"
                         autocomplete="off"
                         spellcheck="false"

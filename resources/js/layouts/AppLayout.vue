@@ -1,7 +1,11 @@
 <script setup lang="ts">
+import { provide, ref } from 'vue';
 import AppFooter from '@/components/AppFooter.vue';
 import AppHeader from '@/components/AppHeader.vue';
 import AppNav from '@/components/AppNav.vue';
+import { pluginSearchKey } from '@/lib/pluginSearch';
+
+provide(pluginSearchKey, ref(''));
 </script>
 
 <template>
