@@ -15,6 +15,6 @@
 }
 
 .app-footer__link {
-    @apply text-orange-500 underline;
+    @apply text-orange-500  hover:underline;
 }
 </style>
