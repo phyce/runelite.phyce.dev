@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Inertia\Support\Header;
 use Symfony\Component\HttpFoundation\Response;
 
 class CacheResponse
@@ -19,8 +20,14 @@ class CacheResponse
             return $response;
         }
 
-        $inertiaHeader = $request->header('X-Inertia', '');
-        $cacheKey = 'response:'.md5($request->fullUrl().$inertiaHeader);
+        $cacheKey = 'response:'.md5(implode('|', [
+            $request->fullUrl(),
+            $request->header(Header::INERTIA, ''),
+            $request->header(Header::PARTIAL_COMPONENT, ''),
+            $request->header(Header::PARTIAL_ONLY, ''),
+            $request->header(Header::PARTIAL_EXCEPT, ''),
+            $request->header(Header::EXCEPT_ONCE_PROPS, ''),
+        ]));
 
         $cached = Cache::get($cacheKey);
 

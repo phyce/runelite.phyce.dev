@@ -20,9 +20,6 @@ class PluginController extends Controller
 
     public function index(Request $request): Response
     {
-        $params = $request->only(['range']);
-        $plugins = $this->runeliteApi->getClientPlugins($params);
-
         SEOTools::setTitle('RuneLite Plugin Stats — Browse All Plugins');
         SEOTools::setDescription('Browse install counts, all-time highs for every RuneLite plugins.');
         SEOTools::opengraph()->setUrl(route('home'));
@@ -36,11 +33,9 @@ class PluginController extends Controller
         TwitterCard::setType('summary_large_image');
         TwitterCard::setImage(asset('img/og-static.png'));
 
-        Cache::put('sitemap.xml', app(GenerateSitemap::class)->handle($plugins), now()->addWeek());
+        Cache::put('sitemap.xml', app(GenerateSitemap::class)->handle($this->runeliteApi->getPlugins()), now()->addWeek());
 
-        return inertia('Index', [
-            'plugins' => $plugins,
-        ]);
+        return inertia('Index');
     }
 
     public function show(Request $request, string $name): Response

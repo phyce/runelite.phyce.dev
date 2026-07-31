@@ -4,10 +4,15 @@ namespace App\Http\Middleware;
 
 use App\Services\RuneliteApiService;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 use Inertia\Middleware;
+use Inertia\OnceProp;
+use Inertia\OptionalProp;
 
 class HandleInertiaRequests extends Middleware
 {
+    private const PLUGIN_LIST_TTL_MINUTES = 60;
+
     /**
      * The root template that's loaded on the first page visit.
      *
@@ -43,7 +48,19 @@ class HandleInertiaRequests extends Middleware
             'name' => config('app.name'),
             'apiUrl' => rtrim(config('services.runelite_api.client_url'), '/'),
             'appUrl' => config('app.url'),
-            'plugins' => $this->runeliteApi->getClientPlugins([]),
+            'plugins' => $this->pluginList($request),
         ];
+    }
+
+    private function pluginList(Request $request): OnceProp|OptionalProp
+    {
+        $plugins = fn (): array => $this->runeliteApi->getClientPlugins();
+        $ttl = now()->addMinutes(self::PLUGIN_LIST_TTL_MINUTES);
+
+        if ($request->routeIs('home')) {
+            return Inertia::once($plugins)->until($ttl);
+        }
+
+        return Inertia::optional($plugins)->once(until: $ttl);
     }
 }

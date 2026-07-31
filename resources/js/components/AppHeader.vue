@@ -29,6 +29,36 @@ function isActive(link: { href: string; exact: boolean }): boolean {
     return currentPath.value.startsWith(link.href);
 }
 
+const pluginsLoaded = computed(() => Array.isArray(page.props.plugins));
+const loadingPlugins = ref(false);
+const pluginsFailed = ref(false);
+
+function loadPlugins(): void {
+    if (pluginsLoaded.value || loadingPlugins.value) return;
+
+    loadingPlugins.value = true;
+    pluginsFailed.value = false;
+
+    router.reload({
+        only: ['plugins'],
+        showProgress: false,
+        onFinish: () => {
+            loadingPlugins.value = false;
+            pluginsFailed.value = !pluginsLoaded.value;
+        },
+    });
+}
+
+const searchNotice = computed(() => {
+    if (!searchInput.value.trim() || pluginsLoaded.value) return '';
+    return pluginsFailed.value ? 'Could not load the plugin list.' : 'Loading plugins…';
+});
+
+function openSearch(): void {
+    searchVisible.value = true;
+    loadPlugins();
+}
+
 const searchResults = computed(() => {
     const q = searchInput.value.trim();
     if (!q) return [];
@@ -70,6 +100,7 @@ function closeMenu(): void {
 
 async function openMenuForSearch(): Promise<void> {
     menuOpen.value = true;
+    loadPlugins();
     await nextTick();
     searchInputRef.value?.focus();
 }
@@ -88,7 +119,7 @@ async function openMenuForSearch(): Promise<void> {
                 />
                 <div class="app-header__title-group">
                     <span class="app-header__title">RuneLite Plugin Stats</span>
-                    <span class="app-header__version">v0.5.0</span>
+                    <span class="app-header__version">v0.5.1</span>
                 </div>
             </a>
 
@@ -111,10 +142,13 @@ async function openMenuForSearch(): Promise<void> {
                         type="text"
                         autocomplete="off"
                         spellcheck="false"
-                        @focus="searchVisible = true"
+                        @focus="openSearch"
                         @blur="onBlur"
                     />
-                    <div v-if="searchVisible && searchResults.length > 0" class="app-header__search-results">
+                    <div v-if="searchVisible && searchNotice" class="app-header__search-results">
+                        <span class="app-header__search-notice">{{ searchNotice }}</span>
+                    </div>
+                    <div v-else-if="searchVisible && searchResults.length > 0" class="app-header__search-results">
                         <a
                             v-for="plugin in searchResults"
                             :key="plugin.id"
@@ -195,11 +229,14 @@ async function openMenuForSearch(): Promise<void> {
                             type="text"
                             autocomplete="off"
                             spellcheck="false"
-                            @focus="searchVisible = true"
+                            @focus="openSearch"
                             @blur="onBlur"
                         />
                     </div>
-                    <div v-if="searchResults.length > 0" class="app-header__drawer-results">
+                    <div v-if="searchNotice" class="app-header__drawer-results">
+                        <span class="app-header__search-notice">{{ searchNotice }}</span>
+                    </div>
+                    <div v-else-if="searchResults.length > 0" class="app-header__drawer-results">
                         <a
                             v-for="plugin in searchResults"
                             :key="plugin.id"
@@ -302,6 +339,10 @@ async function openMenuForSearch(): Promise<void> {
 
 .app-header__search-result + .app-header__search-result {
     @apply border-t border-neutral-800;
+}
+
+.app-header__search-notice {
+    @apply block px-3 py-2.5 text-sm text-neutral-400;
 }
 
 .app-header__search-result-name {
