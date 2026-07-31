@@ -8,6 +8,9 @@
 
         <link rel="icon" href="/img/favicon.png" sizes="any">
 
+        <link rel="preload" as="font" type="font/woff2" href="/fonts/poppins-400.woff2" crossorigin>
+        <link rel="preload" as="font" type="font/woff2" href="/fonts/poppins-500.woff2" crossorigin>
+
         {!! SEOMeta::generate(false) !!}
         {!! OpenGraph::generate() !!}
         {!! Twitter::generate() !!}
