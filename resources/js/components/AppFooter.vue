@@ -11,10 +11,10 @@
 @reference "tailwindcss";
 
 .app-footer {
-    @apply py-4 text-center text-sm text-gray-500;
+    @apply py-4 text-center text-sm text-gray-400;
 }
 
 .app-footer__link {
-    @apply text-orange-500 hover:underline;
+    @apply text-orange-500  hover:underline;
 }
 </style>
