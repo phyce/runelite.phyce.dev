@@ -22,7 +22,7 @@ export default defineConfig({
         }),
         wayfinder({
             formVariants: true,
-            command: 'php artisan route:clear && php artisan wayfinder:generate',
+            command: 'php artisan route:clear > /dev/null 2>&1; php artisan wayfinder:generate',
         }),
     ],
 });
