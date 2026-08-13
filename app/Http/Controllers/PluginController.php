@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Actions\GenerateSitemap;
 use App\Services\RuneliteApiService;
+use Artesaos\SEOTools\Facades\JsonLd;
 use Artesaos\SEOTools\Facades\SEOMeta;
 use Artesaos\SEOTools\Facades\SEOTools;
 use Artesaos\SEOTools\Facades\TwitterCard;
@@ -20,12 +21,15 @@ class PluginController extends Controller
 
     public function index(Request $request): Response
     {
-        SEOTools::setTitle('RuneLite Plugin Stats — Browse All Plugins');
-        SEOTools::setDescription('Browse install counts, all-time highs for every RuneLite plugins.');
+        $title = 'RuneLite Plugin Stats';
+        $description = 'Browse install counts, all-time highs, and growth trends for every RuneLite plugin.';
+
+        SEOTools::setTitle($title);
+        SEOTools::setDescription($description);
         SEOTools::opengraph()->setUrl(route('home'));
         SEOTools::opengraph()->addProperty('type', 'website');
-        SEOTools::opengraph()->addProperty('title', 'RuneLite Plugin Stats — Browse All Plugins');
-        SEOTools::opengraph()->addProperty('description', 'Browse install counts, all-time highs for every RuneLite plugin.');
+        SEOTools::opengraph()->addProperty('title', $title);
+        SEOTools::opengraph()->addProperty('description', $description);
         SEOTools::opengraph()->addProperty('site_name', config('app.name'));
         SEOTools::opengraph()->addImage(asset('img/og-static.png'));
         SEOMeta::setCanonical(route('home'));
@@ -48,14 +52,14 @@ class PluginController extends Controller
         }
 
         $pluginName = $plugin['display'] ?? $plugin['name'];
-        $title = "{$pluginName} — RuneLite Plugin Stats";
+        $title = "{$pluginName} - RuneLite Plugin Stats";
 
         $metaParts = [];
         if (! empty($plugin['author'])) {
             $metaParts[] = "by {$plugin['author']}";
         }
         if (! empty($plugin['created_on'])) {
-            $metaParts[] = 'released : '.Carbon::parse($plugin['created_on'])->format('F j, Y');
+            $metaParts[] = 'released '.Carbon::parse($plugin['created_on'])->format('F j, Y');
         }
         $metaPrefix = implode(', ', $metaParts);
 
@@ -83,6 +87,38 @@ class PluginController extends Controller
         TwitterCard::setDescription($description);
         TwitterCard::setType('summary_large_image');
         TwitterCard::setImage($imageUrl);
+
+        JsonLd::setType('SoftwareApplication');
+        JsonLd::addValue('name', $pluginName);
+        JsonLd::addValue('description', $summary);
+        JsonLd::addValue('url', route('plugin.show', $name));
+        JsonLd::addValue('image', $imageUrl);
+        JsonLd::addValue('applicationCategory', 'GameApplication');
+        JsonLd::addValue('operatingSystem', 'Windows, macOS, Linux');
+        JsonLd::addValue('sameAs', "https://runelite.net/plugin-hub/show/{$name}");
+
+        if (! empty($plugin['author'])) {
+            JsonLd::addValue('author', [
+                '@type' => 'Person',
+                'name' => $plugin['author'],
+            ]);
+        }
+
+        if (! empty($plugin['created_on'])) {
+            JsonLd::addValue('datePublished', Carbon::parse($plugin['created_on'])->toDateString());
+        }
+
+        if (! empty($plugin['updated_on'])) {
+            JsonLd::addValue('dateModified', Carbon::parse($plugin['updated_on'])->toDateString());
+        }
+
+        if (isset($plugin['current_installs'])) {
+            JsonLd::addValue('interactionStatistic', [
+                '@type' => 'InteractionCounter',
+                'interactionType' => 'https://schema.org/InstallAction',
+                'userInteractionCount' => $plugin['current_installs'],
+            ]);
+        }
 
         return inertia('PluginDetail', [
             'plugin' => $plugin,

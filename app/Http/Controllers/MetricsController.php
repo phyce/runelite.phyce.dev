@@ -36,7 +36,7 @@ class MetricsController extends Controller
         SEOTools::opengraph()->addImage(asset('img/og-static.png'));
         SEOMeta::setCanonical(route('top'));
         SEOMeta::addMeta('robots', 'index, follow');
-        TwitterCard::setTitle('Best RuneLite Plugins — Top 100 Ranked');
+        TwitterCard::setTitle('Best RuneLite Plugins - Top 100 Ranked');
         TwitterCard::setDescription($description);
         TwitterCard::setType('summary_large_image');
         TwitterCard::setImage(asset('img/og-static.png'));

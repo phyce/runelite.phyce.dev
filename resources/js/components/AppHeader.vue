@@ -24,6 +24,8 @@ const links = [
 
 const currentPath = computed(() => new URL(page.url, 'http://x').pathname);
 
+const isHomePage = computed(() => page.component === 'Index');
+
 function isActive(link: { href: string; exact: boolean }): boolean {
     if (link.exact) return currentPath.value === link.href;
     return currentPath.value.startsWith(link.href);
@@ -118,7 +120,7 @@ async function openMenuForSearch(): Promise<void> {
                     alt="RuneLite logo"
                 />
                 <div class="app-header__title-group">
-                    <span class="app-header__title">RuneLite Plugin Stats</span>
+                    <component :is="isHomePage ? 'h1' : 'span'" class="app-header__title">RuneLite Plugin Stats</component>
                     <span class="app-header__version">v0.5.1</span>
                 </div>
             </a>

@@ -52,7 +52,7 @@ function coauthorLabel(entry: DeveloperPluginEntry): string | null {
 </script>
 
 <template>
-    <Head :title="`${developer.name} — RuneLite Plugin Developer Stats`" />
+    <Head :title="`${developer.name} - RuneLite Plugin Developer Stats`" />
 
     <div class="dev-profile">
         <section class="dev-profile__hero">

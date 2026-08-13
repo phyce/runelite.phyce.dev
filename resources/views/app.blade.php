@@ -4,8 +4,6 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title data-inertia>{{ config('app.name', 'Laravel') }}</title>
-
         <link rel="icon" href="/img/favicon.png" sizes="any">
 
         <link rel="preload" as="font" type="font/woff2" href="/fonts/poppins-400.woff2" crossorigin>

@@ -240,14 +240,14 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <Head :title="`${plugin.display || plugin.name} — RuneLite Plugin Stats`" />
+    <Head :title="`${plugin.display || plugin.name} - RuneLite Plugin Stats`" />
 
     <div class="plugin-detail">
         <!-- Info card -->
         <div class="plugin-detail__info">
-            <h3 class="plugin-detail__title">
+            <h1 class="plugin-detail__title">
                 {{ plugin.display || plugin.name }}
-            </h3>
+            </h1>
             <p class="plugin-detail__description">{{ plugin.description }}</p>
             <p class="plugin-detail__tags" data-nosnippet>{{ plugin.tags }}</p>
 

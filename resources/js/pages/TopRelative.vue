@@ -39,7 +39,7 @@ const rows = computed((): GrowthEntry[] => props.entries ?? []);
 </script>
 
 <template>
-    <Head title="Fastest Growing | RuneLite Plugin Stats" />
+    <Head title="Fastest Growing RuneLite Plugins | RuneLite Plugin Stats" />
 
     <div class="top-relative">
         <div class="top-relative__top-bar">

@@ -11,7 +11,7 @@ return [
          * The default configurations to be used by the meta generator.
          */
         'defaults' => [
-            'title' => 'RuneLite Plugin Stats', // set false to total remove
+            'title' => false, // set false to total remove
             'titleBefore' => false, // Put defaults.title before page title, like 'It's Over 9000! - Dashboard'
             'description' => 'Browse install statistics, growth trends, and rankings for RuneLite plugins.', // set false to total remove
             'separator' => ' - ',

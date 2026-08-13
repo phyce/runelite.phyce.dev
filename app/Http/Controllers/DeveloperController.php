@@ -66,7 +66,7 @@ class DeveloperController extends Controller
         SEOTools::opengraph()->addImage(asset('img/og-static.png'));
         SEOMeta::setCanonical(route('developers.top'));
         SEOMeta::addMeta('robots', 'index, follow');
-        TwitterCard::setTitle('Best RuneLite Plugin Developers — Top 100 Ranked');
+        TwitterCard::setTitle('Best RuneLite Plugin Developers - Top 100 Ranked');
         TwitterCard::setDescription($description);
         TwitterCard::setType('summary_large_image');
         TwitterCard::setImage(asset('img/og-static.png'));
@@ -164,7 +164,7 @@ class DeveloperController extends Controller
         $name = $developer['name'];
         $pluginCount = $developer['plugin_count'] ?? 0;
         $installs = number_format($developer['total_installs'] ?? 0);
-        $title = "{$name} — RuneLite Plugin Developer Stats";
+        $title = "{$name} - RuneLite Plugin Developer Stats";
         $description = "{$name} has {$pluginCount} plugins on the RuneLite plugin hub with {$installs} installs. See their portfolio, growth, collaborators, and ranking.";
 
         SEOTools::setTitle($title);
