@@ -2,8 +2,11 @@
 
 namespace App\Services;
 
+use App\Exceptions\RuneliteApiUnavailableException;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class RuneliteApiService
 {
@@ -126,7 +129,7 @@ class RuneliteApiService
     public function getDeveloper(string $slug): ?array
     {
         return $this->cached("developers/{$slug}", [], 3600, function () use ($slug) {
-            return $this->fetch("developers/{$slug}", []);
+            return $this->fetch('developers/'.rawurlencode($slug), []);
         });
     }
 
@@ -151,6 +154,41 @@ class RuneliteApiService
         });
     }
 
+    public function getTags(): array
+    {
+        return $this->cached('tags', [], 3600, function () {
+            return $this->fetch('tags', []) ?? [];
+        });
+    }
+
+    public function getTag(string $slug): ?array
+    {
+        return $this->cached("tags/{$slug}", [], 3600, function () use ($slug) {
+            return $this->fetch('tags/'.rawurlencode($slug), []);
+        });
+    }
+
+    public function getTagsTop(): array
+    {
+        return $this->cached('tags/top', [], 3600, function () {
+            return $this->fetch('tags/top', []) ?? [];
+        });
+    }
+
+    public function getTagsPopular(string $period): array
+    {
+        return $this->cached('tags/top/popular', ['period' => $period], 3600, function () use ($period) {
+            return $this->fetch('tags/top/popular', ['period' => $period]) ?? [];
+        });
+    }
+
+    public function getTagsGrowing(string $period): array
+    {
+        return $this->cached('tags/top/growing', ['period' => $period], 3600, function () use ($period) {
+            return $this->fetch('tags/top/growing', ['period' => $period]) ?? [];
+        });
+    }
+
     public function getPluginDevelopers(string $author): array
     {
         $author = trim($author);
@@ -170,12 +208,15 @@ class RuneliteApiService
         ], $names));
     }
 
-    /** @return array<mixed> */
     public function getRelatedPlugins(string $name, int $limit = 12): array
     {
-        return $this->cached("plugin/{$name}/related", ['limit' => $limit], 3600, function () use ($name, $limit) {
-            return $this->fetch("plugin/{$name}/related", ['limit' => $limit]) ?? [];
-        });
+        try {
+            return $this->cached("plugin/{$name}/related", ['limit' => $limit], 3600, function () use ($name, $limit) {
+                return $this->fetch("plugin/{$name}/related", ['limit' => $limit]) ?? [];
+            });
+        } catch (RuneliteApiUnavailableException) {
+            return [];
+        }
     }
 
     private function matchDeveloper(string $name): ?array
@@ -191,7 +232,11 @@ class RuneliteApiService
             return $this->developerLookups;
         }
 
-        $developers = $this->getDevelopers()['developers'] ?? [];
+        try {
+            $developers = $this->getDevelopers()['developers'] ?? [];
+        } catch (RuneliteApiUnavailableException) {
+            $developers = [];
+        }
 
         $exact = [];
         $loose = [];
@@ -237,13 +282,28 @@ class RuneliteApiService
         return array_values(array_filter($parts, fn (string $part): bool => $part !== ''));
     }
 
-    /** @return array<mixed>|null */
+    /**
+     * The `data` of a successful API response, or null when the API says the
+     * thing does not exist (404).
+     *
+     * @return array<mixed>|null
+     *
+     * @throws RuneliteApiUnavailableException when the API is unreachable or answers with any other error
+     */
     private function fetch(string $endpoint, array $params): ?array
     {
-        $response = Http::get("{$this->baseUrl}/{$endpoint}", $params);
+        try {
+            $response = Http::get("{$this->baseUrl}/{$endpoint}", $params);
+        } catch (ConnectionException $exception) {
+            throw $this->unavailable($endpoint, $exception->getMessage(), $exception);
+        }
+
+        if ($response->notFound()) {
+            return null;
+        }
 
         if (! $response->successful()) {
-            return null;
+            throw $this->unavailable($endpoint, "HTTP {$response->status()}");
         }
 
         $json = $response->json();
@@ -253,6 +313,13 @@ class RuneliteApiService
         }
 
         return $json['data'] ?? null;
+    }
+
+    private function unavailable(string $endpoint, string $reason, ?ConnectionException $previous = null): RuneliteApiUnavailableException
+    {
+        Log::warning("RuneLite API /{$endpoint} unavailable: {$reason}");
+
+        return new RuneliteApiUnavailableException($endpoint, $reason, $previous);
     }
 
     /**

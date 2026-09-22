@@ -79,7 +79,7 @@ const columns: { field: SortField; label: string; numeric: boolean; title?: stri
 </script>
 
 <template>
-    <Head title="All RuneLite Plugin Developers | RuneLite Plugin Stats" />
+    <Head title="Developers | RuneLite Plugin Stats" />
 
     <div class="developers">
         <div class="developers__header">
@@ -194,6 +194,7 @@ const columns: { field: SortField; label: string; numeric: boolean; title?: stri
 }
 
 .developers__wrapper {
+    position: relative;
     @apply -mx-4 overflow-x-auto border-y border-neutral-700 sm:mx-0 sm:rounded-xl sm:border;
     scrollbar-width: thin;
     scrollbar-color: #c54704 #1a1a1a;

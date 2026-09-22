@@ -2,6 +2,7 @@
 import { usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import { index as developersIndex } from '@/actions/App/Http/Controllers/DeveloperController';
+import { index as tagsIndex } from '@/actions/App/Http/Controllers/TagController';
 
 const page = usePage();
 
@@ -11,15 +12,16 @@ const links = [
     { href: '/top/absolute', label: 'Most Popular', exact: false },
     { href: '/top/relative', label: 'Fastest Growing', exact: false },
     { href: developersIndex.url(), label: 'Developers', exact: false },
+    { href: tagsIndex.url(), label: 'Tags', exact: false, detailPrefix: '/tag/' },
 ];
 
 const currentPath = computed(() => new URL(page.url, 'http://x').pathname);
 
-function isActive(link: { href: string; exact: boolean }): boolean {
+function isActive(link: { href: string; exact: boolean; detailPrefix?: string }): boolean {
     if (link.exact) {
         return currentPath.value === link.href;
     }
-    return currentPath.value.startsWith(link.href);
+    return currentPath.value.startsWith(link.href) || (link.detailPrefix !== undefined && currentPath.value.startsWith(link.detailPrefix));
 }
 </script>
 

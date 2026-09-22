@@ -49,6 +49,8 @@ const sortedPlugins = computed(() => {
 const tableWrapper = ref<HTMLElement>();
 const stickyScrollbar = ref<HTMLElement>();
 const scrollWidth = ref(0);
+const leftFadeOpacity = ref(0);
+const rightFadeOpacity = ref(0);
 
 let resizeObserver: ResizeObserver | null = null;
 
@@ -57,16 +59,20 @@ onMounted(() => {
     const sticky = stickyScrollbar.value;
     if (!wrapper || !sticky) return;
 
-    const updateWidth = () => {
+    const updateScrollState = () => {
         scrollWidth.value = wrapper.scrollWidth;
+        const maxScroll = wrapper.scrollWidth - wrapper.clientWidth;
+        leftFadeOpacity.value = maxScroll > 2 && wrapper.scrollLeft > 2 ? 1 : 0;
+        rightFadeOpacity.value = maxScroll > 2 && maxScroll - wrapper.scrollLeft > 2 ? 1 : 0;
     };
-    updateWidth();
+    updateScrollState();
 
-    resizeObserver = new ResizeObserver(updateWidth);
+    resizeObserver = new ResizeObserver(updateScrollState);
     resizeObserver.observe(wrapper);
 
     let syncing = false;
     wrapper.addEventListener('scroll', () => {
+        updateScrollState();
         if (syncing) return;
         syncing = true;
         sticky.scrollLeft = wrapper.scrollLeft;
@@ -96,7 +102,8 @@ const columns: { field: SortField; label: string }[] = [
 <template>
     <Head title="RuneLite Plugin Stats" />
 
-    <div ref="tableWrapper" class="plugin-table__wrapper">
+    <div class="plugin-table__scroll-area">
+        <div ref="tableWrapper" class="plugin-table__wrapper">
         <table class="plugin-table">
             <thead class="plugin-table__head">
                 <tr>
@@ -105,6 +112,7 @@ const columns: { field: SortField; label: string }[] = [
                         :key="col.field"
                         scope="col"
                         class="plugin-table__head-cell plugin-table__head-cell--sortable"
+                        :class="{ 'plugin-table__head-cell--right': col.field === 'updated_on' }"
                         @click="handleSort(col.field)"
                     >
                         {{ col.label }}
@@ -140,6 +148,9 @@ const columns: { field: SortField; label: string }[] = [
                 </tr>
             </tbody>
         </table>
+        </div>
+        <div class="plugin-table__fade plugin-table__fade--left" :style="{ opacity: leftFadeOpacity }" aria-hidden="true" />
+        <div class="plugin-table__fade plugin-table__fade--right" :style="{ opacity: rightFadeOpacity }" aria-hidden="true" />
     </div>
 
     <div ref="stickyScrollbar" class="plugin-table__scrollbar">
@@ -150,7 +161,46 @@ const columns: { field: SortField; label: string }[] = [
 <style scoped>
 @reference "tailwindcss";
 
+.plugin-table__scroll-area {
+    @apply relative overflow-hidden sm:rounded-xl;
+}
+
+.plugin-table__fade {
+    @apply pointer-events-none absolute inset-y-0 w-8 opacity-0 transition-opacity duration-150;
+}
+
+.plugin-table__fade--left {
+    @apply left-0 sm:rounded-l-xl;
+    background:
+        linear-gradient(to right, rgba(255, 108, 33, 0.07), transparent 40%),
+        linear-gradient(
+            to right,
+            rgba(13, 13, 13, 0.92) 0%,
+            rgba(13, 13, 13, 0.74) 20%,
+            rgba(13, 13, 13, 0.5) 42%,
+            rgba(13, 13, 13, 0.26) 65%,
+            rgba(13, 13, 13, 0.08) 84%,
+            rgba(13, 13, 13, 0) 100%
+        );
+}
+
+.plugin-table__fade--right {
+    @apply right-0 sm:rounded-r-xl;
+    background:
+        linear-gradient(to left, rgba(255, 108, 33, 0.07), transparent 40%),
+        linear-gradient(
+            to left,
+            rgba(13, 13, 13, 0.92) 0%,
+            rgba(13, 13, 13, 0.74) 20%,
+            rgba(13, 13, 13, 0.5) 42%,
+            rgba(13, 13, 13, 0.26) 65%,
+            rgba(13, 13, 13, 0.08) 84%,
+            rgba(13, 13, 13, 0) 100%
+        );
+}
+
 .plugin-table__wrapper {
+    position: relative;
     @apply overflow-x-auto border-y border-neutral-700 sm:rounded-xl sm:border;
     scrollbar-width: none;
 }
@@ -179,6 +229,10 @@ const columns: { field: SortField; label: string }[] = [
 
 .plugin-table__head-cell--sortable:hover {
     color: #ff6c21;
+}
+
+.plugin-table__head-cell--right {
+    @apply text-right;
 }
 
 .plugin-table__sort--active {
@@ -212,6 +266,7 @@ const columns: { field: SortField; label: string }[] = [
 
 .plugin-table__cell--num {
     @apply tabular-nums font-medium text-gray-200;
+    width: 1%;
     white-space: nowrap;
 }
 
@@ -221,15 +276,17 @@ const columns: { field: SortField; label: string }[] = [
 
 .plugin-table__cell--desc {
     @apply text-gray-400;
-    max-width: 28rem;
 }
 
 .plugin-table__cell--date {
+    @apply text-right;
+    width: 1%;
     white-space: nowrap;
 }
 
 .plugin-table__cell--action {
     @apply text-right;
+    width: 1%;
     white-space: nowrap;
 }
 

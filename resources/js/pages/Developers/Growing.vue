@@ -32,7 +32,7 @@ const rows = computed((): DeveloperRankEntry[] => props.rankings?.entries ?? [])
 </script>
 
 <template>
-    <Head title="Fastest Growing RuneLite Plugin Developers | RuneLite Plugin Stats" />
+    <Head title="Fastest Growing Developers | RuneLite Plugin Stats" />
 
     <div class="dev-growing">
         <div class="dev-growing__top-bar">
@@ -161,6 +161,7 @@ const rows = computed((): DeveloperRankEntry[] => props.rankings?.entries ?? [])
 }
 
 .dev-growing__wrapper {
+    position: relative;
     @apply -mx-4 overflow-x-auto border-y border-neutral-700 sm:mx-0 sm:rounded-xl sm:border;
     scrollbar-width: thin;
     scrollbar-color: #c54704 #1a1a1a;
@@ -252,7 +253,7 @@ const rows = computed((): DeveloperRankEntry[] => props.rankings?.entries ?? [])
 }
 
 .dev-growing__pct {
-    @apply flex flex-col items-end gap-0;
+    @apply flex flex-col items-end gap-0 sm:flex-row sm:items-baseline sm:justify-end sm:gap-1.5;
 }
 
 .dev-growing__pct-value {
@@ -272,7 +273,7 @@ const rows = computed((): DeveloperRankEntry[] => props.rankings?.entries ?? [])
 }
 
 .dev-growing__installs {
-    @apply flex flex-col items-end gap-0;
+    @apply flex flex-col items-end gap-0 sm:flex-row sm:items-baseline sm:justify-end sm:gap-1.5;
 }
 
 .dev-growing__installs-gain {

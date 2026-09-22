@@ -71,6 +71,56 @@ export interface DeveloperRankings {
     entries: DeveloperRankEntry[];
 }
 
+export type TagPeriod = 'day' | 'week' | 'month' | 'year' | 'all';
+
+export interface TagSummary {
+    slug: string;
+    name: string;
+    plugin_count: number;
+    total_installs: number;
+    first_used?: string | null;
+}
+
+export interface TagRankEntry extends TagSummary {
+    rank: number;
+    absolute_growth: number;
+    pct_growth: number;
+    growth_base: number;
+}
+
+export interface TagRankings {
+    window?: string;
+    computed_at: string;
+    entries: TagRankEntry[];
+}
+
+export interface TagCloudTag {
+    slug: string;
+    name: string;
+    plugin_count: number;
+    total_installs: number;
+}
+
+export interface TagPluginEntry {
+    plugin: Plugin;
+    other_tags: string[];
+}
+
+export interface TagDetail {
+    slug: string;
+    name: string;
+    aliases: string[] | null;
+    plugin_count: number;
+    first_used: string | null;
+    days_used: number;
+    last_updated: string | null;
+    days_since_update: number;
+    total_installs: number;
+    peak_installs: number;
+    ranks: { installs: number };
+    plugins: TagPluginEntry[];
+}
+
 export interface DeveloperSummary {
     slug: string;
     name: string;
@@ -96,6 +146,7 @@ export interface PluginDeveloper {
 export interface DeveloperPluginEntry {
     plugin: Plugin;
     coauthors: string[] | null;
+    contributing_since: string | null;
 }
 
 export interface Developer {

@@ -36,7 +36,7 @@ const rows = computed((): DeveloperRankEntry[] => props.rankings?.entries ?? [])
 </script>
 
 <template>
-    <Head title="Most Popular RuneLite Plugin Developers | RuneLite Plugin Stats" />
+    <Head title="Most Popular Developers | RuneLite Plugin Stats" />
 
     <div class="dev-popular">
         <div class="dev-popular__top-bar">
@@ -172,6 +172,7 @@ const rows = computed((): DeveloperRankEntry[] => props.rankings?.entries ?? [])
 }
 
 .dev-popular__wrapper {
+    position: relative;
     @apply -mx-4 overflow-x-auto border-y border-neutral-700 sm:mx-0 sm:rounded-xl sm:border;
     scrollbar-width: thin;
     scrollbar-color: #c54704 #1a1a1a;
@@ -263,7 +264,7 @@ const rows = computed((): DeveloperRankEntry[] => props.rankings?.entries ?? [])
 }
 
 .dev-popular__installs {
-    @apply flex flex-col items-end gap-0;
+    @apply flex flex-col items-end gap-0 sm:flex-row sm:items-baseline sm:justify-end sm:gap-1.5;
 }
 
 .dev-popular__installs-total {
@@ -287,7 +288,7 @@ const rows = computed((): DeveloperRankEntry[] => props.rankings?.entries ?? [])
 }
 
 .dev-popular__pct {
-    @apply flex flex-col items-end gap-0;
+    @apply flex flex-col items-end gap-0 sm:flex-row sm:items-baseline sm:justify-end sm:gap-1.5;
 }
 
 .dev-popular__pct-value {

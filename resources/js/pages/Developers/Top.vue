@@ -17,7 +17,7 @@ const rows = computed((): DeveloperRankEntry[] => props.rankings?.entries ?? [])
 </script>
 
 <template>
-    <Head title="Top RuneLite Plugin Developers | RuneLite Plugin Stats" />
+    <Head title="Top Developers | RuneLite Plugin Stats" />
 
     <div class="dev-top">
         <div class="dev-top__header">
@@ -93,6 +93,7 @@ const rows = computed((): DeveloperRankEntry[] => props.rankings?.entries ?? [])
 }
 
 .dev-top__wrapper {
+    position: relative;
     @apply -mx-4 overflow-x-auto border-y border-neutral-700 sm:mx-0 sm:rounded-xl sm:border;
     scrollbar-width: thin;
     scrollbar-color: #c54704 #1a1a1a;

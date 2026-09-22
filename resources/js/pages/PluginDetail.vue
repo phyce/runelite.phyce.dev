@@ -15,9 +15,10 @@ import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { Line } from 'vue-chartjs';
 import { show as developerShow } from '@/actions/App/Http/Controllers/DeveloperController';
 import { show } from '@/actions/App/Http/Controllers/PluginController';
+import { show as tagShow } from '@/actions/App/Http/Controllers/TagController';
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { Plugin, PluginDeveloper, PluginHistoryData, RelatedPlugins } from '@/types';
-import { formatChartDate, formatDate, formatNumber } from '@/utils/formatting';
+import { formatChartDate, formatDate, formatDateTime, formatNumber } from '@/utils/formatting';
 
 ChartJS.register(
     Title,
@@ -36,6 +37,7 @@ const props = defineProps<{
     plugin: Plugin;
     related: RelatedPlugins | null;
     developers: PluginDeveloper[];
+    tagLinks: { slug: string; label: string }[];
 }>();
 
 const relatedEntries = computed(() => props.related?.entries ?? []);
@@ -61,19 +63,31 @@ function toDateInputValue(date: Date): string {
     return `${year}-${month}-${day}`;
 }
 
+const ranges = [
+    { value: 'day', label: 'Day' },
+    { value: 'week', label: 'Week' },
+    { value: 'month', label: 'Month' },
+    { value: 'month-to-date', label: 'Month to Date' },
+    { value: 'all', label: 'All' },
+];
+
 const initialQuery = new URLSearchParams(page.url.split('?')[1] ?? '');
-const currentRange = ref<string>(initialQuery.get('range') ?? 'custom');
+const requestedRange = initialQuery.get('range');
+const currentRange = ref<string>(
+    requestedRange && ranges.some((range) => range.value === requestedRange) ? requestedRange : 'custom',
+);
+
+function initialDate(name: string, fallback: Date): string {
+    const value = initialQuery.get(name);
+    return value && /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(value)) ? value : toDateInputValue(fallback);
+}
 
 const today = new Date();
 const monthAgo = new Date(today);
 monthAgo.setMonth(monthAgo.getMonth() - 1);
 
-const customFrom = ref<string>(
-    initialQuery.get('fromdate') ?? toDateInputValue(monthAgo),
-);
-const customTo = ref<string>(
-    initialQuery.get('todate') ?? toDateInputValue(today),
-);
+const customFrom = ref<string>(initialDate('fromdate', monthAgo));
+const customTo = ref<string>(initialDate('todate', today));
 
 const chartData = ref({
     labels: [] as string[],
@@ -104,6 +118,12 @@ const chartOptions = {
             bodyColor: '#d1d5db',
             borderColor: 'rgba(255, 108, 33, 0.3)',
             borderWidth: 1,
+            callbacks: {
+                title: (items: { dataIndex: number }[]): string => {
+                    const point = historyData.value[items[0]?.dataIndex ?? -1];
+                    return point ? formatDateTime(point.date) : '';
+                },
+            },
         },
     },
     scales: {
@@ -146,7 +166,7 @@ async function fetchHistory(): Promise<void> {
         const url = `${page.props.apiUrl}/plugin/${props.plugin.name}/history${queryString ? '?' + queryString : ''}`;
         const response = await fetch(url);
         const json = await response.json();
-        historyData.value = json.data ?? [];
+        historyData.value = json.success && Array.isArray(json.data) ? json.data : [];
         const includeTime = currentRange.value === 'day';
         chartData.value = {
             labels: historyData.value.map((d) =>
@@ -203,14 +223,6 @@ function applyCustomRange(): void {
     fetchHistory();
 }
 
-const ranges = [
-    { value: 'day', label: 'Day' },
-    { value: 'week', label: 'Week' },
-    { value: 'month', label: 'Month' },
-    { value: 'month-to-date', label: 'Month to Date' },
-    { value: 'all', label: 'All' },
-];
-
 let intervalId: ReturnType<typeof setInterval> | null = null;
 const pageLoadTime = new Date();
 
@@ -240,7 +252,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <Head :title="`${plugin.display || plugin.name} - RuneLite Plugin Stats`" />
+    <Head :title="`${plugin.display || plugin.name} | RuneLite Plugin Stats`" />
 
     <div class="plugin-detail">
         <!-- Info card -->
@@ -249,7 +261,12 @@ onUnmounted(() => {
                 {{ plugin.display || plugin.name }}
             </h1>
             <p class="plugin-detail__description">{{ plugin.description }}</p>
-            <p class="plugin-detail__tags" data-nosnippet>{{ plugin.tags }}</p>
+            <p v-if="tagLinks.length" class="plugin-detail__tags" data-nosnippet>
+                <template v-for="(tagLink, index) in tagLinks" :key="tagLink.slug"><a
+                    :href="tagShow.url(tagLink.slug)"
+                    class="plugin-detail__tag-link"
+                >{{ tagLink.label }}</a><span v-if="index < tagLinks.length - 1">, </span></template>
+            </p>
 
             <!-- Stats grid -->
             <div class="plugin-detail__stats" data-nosnippet>
@@ -515,6 +532,10 @@ onUnmounted(() => {
 
 .plugin-detail__tags {
     @apply mb-3 text-xs break-words text-gray-400;
+}
+
+.plugin-detail__tag-link {
+    @apply text-gray-400 no-underline transition-colors duration-75 hover:text-orange-500;
 }
 
 .plugin-detail__stats {

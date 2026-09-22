@@ -9,10 +9,22 @@ export function formatDate(dateString: string): string {
     return new Intl.DateTimeFormat('en-US', options).format(new Date(dateString));
 }
 
+export function formatDateTime(dateString: string): string {
+    const options: Intl.DateTimeFormatOptions = {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hourCycle: 'h23',
+    };
+    return new Intl.DateTimeFormat('en-US', options).format(new Date(dateString));
+}
+
 export function formatChartDate(dateString: string, includeTime: boolean): string {
     const date = new Date(dateString);
     if (includeTime) {
-        return new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).format(date);
+        return new Intl.DateTimeFormat('en-US', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(date);
     }
     return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(date);
 }

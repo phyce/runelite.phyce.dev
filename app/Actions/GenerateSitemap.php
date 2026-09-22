@@ -43,6 +43,22 @@ class GenerateSitemap
             );
         }
 
+        foreach (['tags.index', 'tags.top', 'tags.popular', 'tags.growing'] as $tagRoute) {
+            $sitemap->add(
+                Url::create(route($tagRoute))
+                    ->setPriority(0.8)
+                    ->setChangeFrequency(Url::CHANGE_FREQUENCY_DAILY)
+            );
+        }
+
+        foreach ($this->runeliteApi->getTags()['tags'] ?? [] as $tag) {
+            $sitemap->add(
+                Url::create(route('tag.show', ['slug' => $tag['slug']]))
+                    ->setPriority(0.6)
+                    ->setChangeFrequency(Url::CHANGE_FREQUENCY_WEEKLY)
+            );
+        }
+
         foreach ($plugins as $plugin) {
             $sitemap->add(
                 Url::create(route('plugin.show', ['name' => $plugin['name']]))

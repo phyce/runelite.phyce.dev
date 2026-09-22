@@ -7,6 +7,7 @@ use Artesaos\SEOTools\Facades\JsonLd;
 use Artesaos\SEOTools\Facades\SEOMeta;
 use Artesaos\SEOTools\Facades\SEOTools;
 use Artesaos\SEOTools\Facades\TwitterCard;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Response;
 
@@ -27,11 +28,11 @@ class DeveloperController extends Controller
             ? "Browse all {$count} RuneLite plugin developers, with install counts, plugin counts, and how long each has been publishing to the plugin hub."
             : 'Browse every RuneLite plugin developer, with install counts, plugin counts, and how long each has been publishing to the plugin hub.';
 
-        SEOTools::setTitle('All RuneLite Plugin Developers | RuneLite Plugin Stats');
+        SEOTools::setTitle('Developers | RuneLite Plugin Stats');
         SEOTools::setDescription($description);
         SEOTools::opengraph()->setUrl(route('developers.index'));
         SEOTools::opengraph()->addProperty('type', 'website');
-        SEOTools::opengraph()->addProperty('title', 'All RuneLite Plugin Developers | RuneLite Plugin Stats');
+        SEOTools::opengraph()->addProperty('title', 'Developers | RuneLite Plugin Stats');
         SEOTools::opengraph()->addProperty('description', $description);
         SEOTools::opengraph()->addProperty('site_name', config('app.name'));
         SEOTools::opengraph()->addImage(asset('img/og-static.png'));
@@ -56,11 +57,11 @@ class DeveloperController extends Controller
             ? "The top 100 RuneLite plugin developers ranked by popularity, growth, and player retention. Currently #1: {$topDeveloper}. Updated daily."
             : 'The top 100 RuneLite plugin developers ranked by popularity, growth, and player retention. Updated daily.';
 
-        SEOTools::setTitle('Top RuneLite Plugin Developers | RuneLite Plugin Stats');
+        SEOTools::setTitle('Top Developers | RuneLite Plugin Stats');
         SEOTools::setDescription($description);
         SEOTools::opengraph()->setUrl(route('developers.top'));
         SEOTools::opengraph()->addProperty('type', 'website');
-        SEOTools::opengraph()->addProperty('title', 'Top RuneLite Plugin Developers | RuneLite Plugin Stats');
+        SEOTools::opengraph()->addProperty('title', 'Top Developers | RuneLite Plugin Stats');
         SEOTools::opengraph()->addProperty('description', $description);
         SEOTools::opengraph()->addProperty('site_name', config('app.name'));
         SEOTools::opengraph()->addImage(asset('img/og-static.png'));
@@ -90,11 +91,11 @@ class DeveloperController extends Controller
 
         $description = 'See which RuneLite plugin developers are gaining the most installs across their plugins. Filter by day, week, month, year, or all time.';
 
-        SEOTools::setTitle('Most Popular RuneLite Plugin Developers | RuneLite Plugin Stats');
+        SEOTools::setTitle('Most Popular Developers | RuneLite Plugin Stats');
         SEOTools::setDescription($description);
         SEOTools::opengraph()->setUrl(route('developers.popular'));
         SEOTools::opengraph()->addProperty('type', 'website');
-        SEOTools::opengraph()->addProperty('title', 'Most Popular RuneLite Plugin Developers | RuneLite Plugin Stats');
+        SEOTools::opengraph()->addProperty('title', 'Most Popular Developers | RuneLite Plugin Stats');
         SEOTools::opengraph()->addProperty('description', $description);
         SEOTools::opengraph()->addProperty('site_name', config('app.name'));
         SEOTools::opengraph()->addImage(asset('img/og-static.png'));
@@ -125,11 +126,11 @@ class DeveloperController extends Controller
 
         $description = 'See which RuneLite plugin developers are growing the fastest by percentage. Filter by day, week, month, or year.';
 
-        SEOTools::setTitle('Fastest Growing RuneLite Plugin Developers | RuneLite Plugin Stats');
+        SEOTools::setTitle('Fastest Growing Developers | RuneLite Plugin Stats');
         SEOTools::setDescription($description);
         SEOTools::opengraph()->setUrl(route('developers.growing'));
         SEOTools::opengraph()->addProperty('type', 'website');
-        SEOTools::opengraph()->addProperty('title', 'Fastest Growing RuneLite Plugin Developers | RuneLite Plugin Stats');
+        SEOTools::opengraph()->addProperty('title', 'Fastest Growing Developers | RuneLite Plugin Stats');
         SEOTools::opengraph()->addProperty('description', $description);
         SEOTools::opengraph()->addProperty('site_name', config('app.name'));
         SEOTools::opengraph()->addImage(asset('img/og-static.png'));
@@ -153,18 +154,22 @@ class DeveloperController extends Controller
         ]);
     }
 
-    public function show(string $username): Response
+    public function show(string $username): Response|RedirectResponse
     {
         $developer = $this->runeliteApi->getDeveloper($username);
 
-        if ($developer === null) {
+        if (! isset($developer['slug'], $developer['name'])) {
             abort(404);
+        }
+
+        if ($username !== $developer['slug']) {
+            return redirect()->route('developers.show', ['username' => $developer['slug']], 301);
         }
 
         $name = $developer['name'];
         $pluginCount = $developer['plugin_count'] ?? 0;
         $installs = number_format($developer['total_installs'] ?? 0);
-        $title = "{$name} - RuneLite Plugin Developer Stats";
+        $title = "{$name} | RuneLite Plugin Stats";
         $description = "{$name} has {$pluginCount} plugins on the RuneLite plugin hub with {$installs} installs. See their portfolio, growth, collaborators, and ranking.";
 
         SEOTools::setTitle($title);

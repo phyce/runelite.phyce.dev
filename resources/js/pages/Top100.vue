@@ -36,7 +36,7 @@ function pluginDisplayName(entry: RankedPlugin): string {
 </script>
 
 <template>
-    <Head title="Top 100 RuneLite Plugins | RuneLite Plugin Stats" />
+    <Head title="Top 100 Plugins | RuneLite Plugin Stats" />
 
     <div class="top100">
         <div class="top100__header">

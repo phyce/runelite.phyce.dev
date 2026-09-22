@@ -26,11 +26,11 @@ class MetricsController extends Controller
             ? "The top 100 RuneLite plugins ranked by popularity, growth, and player retention. Currently #1: {$topPlugin}. Updated daily."
             : 'The top 100 RuneLite plugins ranked by popularity, growth, and player retention. Updated daily.';
 
-        SEOTools::setTitle('Top 100 RuneLite Plugins | RuneLite Plugin Stats');
+        SEOTools::setTitle('Top 100 Plugins | RuneLite Plugin Stats');
         SEOTools::setDescription($description);
         SEOTools::opengraph()->setUrl(route('top'));
         SEOTools::opengraph()->addProperty('type', 'website');
-        SEOTools::opengraph()->addProperty('title', 'Top 100 RuneLite Plugins | RuneLite Plugin Stats');
+        SEOTools::opengraph()->addProperty('title', 'Top 100 Plugins | RuneLite Plugin Stats');
         SEOTools::opengraph()->addProperty('description', $description);
         SEOTools::opengraph()->addProperty('site_name', config('app.name'));
         SEOTools::opengraph()->addImage(asset('img/og-static.png'));
@@ -78,11 +78,11 @@ class MetricsController extends Controller
         $period = $this->resolvePeriod($request);
         $data = $this->runeliteApi->getTopAbsolute($period);
 
-        SEOTools::setTitle('Most Popular RuneLite Plugins | RuneLite Plugin Stats');
+        SEOTools::setTitle('Most Popular | RuneLite Plugin Stats');
         SEOTools::setDescription('See which RuneLite plugins are gaining the most new installs. Filter by 24 hours, 7 days, 30 days, 6 months, or 1 year.');
         SEOTools::opengraph()->setUrl(route('top.absolute'));
         SEOTools::opengraph()->addProperty('type', 'website');
-        SEOTools::opengraph()->addProperty('title', 'Most Popular RuneLite Plugins | RuneLite Plugin Stats');
+        SEOTools::opengraph()->addProperty('title', 'Most Popular | RuneLite Plugin Stats');
         SEOTools::opengraph()->addProperty('description', 'See which RuneLite plugins are gaining the most new installs.');
         SEOTools::opengraph()->addProperty('site_name', config('app.name'));
         SEOTools::opengraph()->addImage(asset('img/og-static.png'));
@@ -102,11 +102,11 @@ class MetricsController extends Controller
         $period = $this->resolvePeriod($request);
         $data = $this->runeliteApi->getTopRelative($period);
 
-        SEOTools::setTitle('Fastest Growing RuneLite Plugins | RuneLite Plugin Stats');
+        SEOTools::setTitle('Fastest Growing | RuneLite Plugin Stats');
         SEOTools::setDescription('See which RuneLite plugins are growing the fastest. Filter by 24 hours, 7 days, 30 days, 6 months, or 1 year.');
         SEOTools::opengraph()->setUrl(route('top.relative'));
         SEOTools::opengraph()->addProperty('type', 'website');
-        SEOTools::opengraph()->addProperty('title', 'Fastest Growing RuneLite Plugins | RuneLite Plugin Stats');
+        SEOTools::opengraph()->addProperty('title', 'Fastest Growing | RuneLite Plugin Stats');
         SEOTools::opengraph()->addProperty('description', 'See which RuneLite plugins are growing the fastest.');
         SEOTools::opengraph()->addProperty('site_name', config('app.name'));
         SEOTools::opengraph()->addImage(asset('img/og-static.png'));

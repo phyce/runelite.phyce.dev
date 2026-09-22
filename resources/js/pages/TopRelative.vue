@@ -39,7 +39,7 @@ const rows = computed((): GrowthEntry[] => props.entries ?? []);
 </script>
 
 <template>
-    <Head title="Fastest Growing RuneLite Plugins | RuneLite Plugin Stats" />
+    <Head title="Fastest Growing | RuneLite Plugin Stats" />
 
     <div class="top-relative">
         <div class="top-relative__top-bar">
@@ -174,6 +174,7 @@ const rows = computed((): GrowthEntry[] => props.entries ?? []);
 /* ── Table wrapper ── */
 
 .top-relative__wrapper {
+    position: relative;
     @apply -mx-4 overflow-x-auto border-y border-neutral-700 sm:mx-0 sm:rounded-xl sm:border;
     scrollbar-width: thin;
     scrollbar-color: #c54704 #1a1a1a;

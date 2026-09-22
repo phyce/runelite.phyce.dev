@@ -52,7 +52,7 @@ function coauthorLabel(entry: DeveloperPluginEntry): string | null {
 </script>
 
 <template>
-    <Head :title="`${developer.name} - RuneLite Plugin Developer Stats`" />
+    <Head :title="`${developer.name} | RuneLite Plugin Stats`" />
 
     <div class="dev-profile">
         <section class="dev-profile__hero">
@@ -77,7 +77,7 @@ function coauthorLabel(entry: DeveloperPluginEntry): string | null {
                     <span class="dev-profile__figure-label">Installs</span>
                     <span class="dev-profile__figure-value">{{ formatNumber(developer.total_installs) }}</span>
                 </div>
-                <div class="dev-profile__figure" title="Highest their plugins ever stood at once, combined">
+                <div class="dev-profile__figure" title="Highest count of active installs their plugins ever had, combined">
                     <span class="dev-profile__figure-label">All-time high total</span>
                     <span class="dev-profile__figure-value dev-profile__figure-value--peak">
                         {{ formatNumber(developer.peak_installs) }}
@@ -87,7 +87,7 @@ function coauthorLabel(entry: DeveloperPluginEntry): string | null {
 
             <div class="dev-profile__facts">
                 <div class="dev-profile__fact">
-                    <span class="dev-profile__fact-label" title="The date their oldest plugin was first listed on the hub — not their first commit">Publishing since</span>
+                    <span class="dev-profile__fact-label" title="This developer started contributing on this date">Publishing since</span>
                     <span class="dev-profile__fact-value">{{ formatDateOrDash(developer.contributing_since) }}</span>
                 </div>
                 <div class="dev-profile__fact">
@@ -118,6 +118,7 @@ function coauthorLabel(entry: DeveloperPluginEntry): string | null {
                             <th scope="col" class="dev-profile__th">Plugin</th>
                             <th scope="col" class="dev-profile__th dev-profile__th--num">Installs</th>
                             <th scope="col" class="dev-profile__th dev-profile__th--num">All-time high</th>
+                            <th scope="col" class="dev-profile__th dev-profile__th--num">Since</th>
                             <th scope="col" class="dev-profile__th dev-profile__th--num">Updated</th>
                             <th scope="col" class="dev-profile__th"></th>
                         </tr>
@@ -144,6 +145,9 @@ function coauthorLabel(entry: DeveloperPluginEntry): string | null {
                             </td>
                             <td class="dev-profile__td dev-profile__td--num dev-profile__td--muted">
                                 {{ formatNumber(entry.plugin.all_time_high) }}
+                            </td>
+                            <td class="dev-profile__td dev-profile__td--num dev-profile__td--muted">
+                                {{ formatDateOrDash(entry.contributing_since) }}
                             </td>
                             <td class="dev-profile__td dev-profile__td--num dev-profile__td--muted">
                                 {{ formatDate(entry.plugin.updated_on) }}

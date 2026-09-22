@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Actions\GenerateSitemap;
+use App\Exceptions\RuneliteApiUnavailableException;
+use App\Services\PluginTagService;
 use App\Services\RuneliteApiService;
 use Artesaos\SEOTools\Facades\JsonLd;
 use Artesaos\SEOTools\Facades\SEOMeta;
@@ -17,7 +19,10 @@ use Inertia\Response;
 
 class PluginController extends Controller
 {
-    public function __construct(private RuneliteApiService $runeliteApi) {}
+    public function __construct(
+        private RuneliteApiService $runeliteApi,
+        private PluginTagService $tags,
+    ) {}
 
     public function index(Request $request): Response
     {
@@ -37,9 +42,18 @@ class PluginController extends Controller
         TwitterCard::setType('summary_large_image');
         TwitterCard::setImage(asset('img/og-static.png'));
 
-        Cache::put('sitemap.xml', app(GenerateSitemap::class)->handle($this->runeliteApi->getPlugins()), now()->addWeek());
+        $this->refreshSitemap();
 
         return inertia('Index');
+    }
+
+    private function refreshSitemap(): void
+    {
+        try {
+            Cache::put('sitemap.xml', app(GenerateSitemap::class)->handle($this->runeliteApi->getPlugins()), now()->addWeek());
+        } catch (RuneliteApiUnavailableException) {
+            return;
+        }
     }
 
     public function show(Request $request, string $name): Response
@@ -52,7 +66,7 @@ class PluginController extends Controller
         }
 
         $pluginName = $plugin['display'] ?? $plugin['name'];
-        $title = "{$pluginName} - RuneLite Plugin Stats";
+        $title = "{$pluginName} | RuneLite Plugin Stats";
 
         $metaParts = [];
         if (! empty($plugin['author'])) {
@@ -124,6 +138,7 @@ class PluginController extends Controller
             'plugin' => $plugin,
             'related' => $this->runeliteApi->getRelatedPlugins($name),
             'developers' => $this->runeliteApi->getPluginDevelopers($plugin['author'] ?? ''),
+            'tagLinks' => $this->tags->tagsForPlugin($plugin),
         ]);
     }
 

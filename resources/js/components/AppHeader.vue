@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { index as developersIndex } from '@/actions/App/Http/Controllers/DeveloperController';
-import { show } from '@/actions/App/Http/Controllers/PluginController';
-import { scoreSearchResult } from '@/utils/formatting';
-import type { Plugin } from '@/types';
 import { router, usePage } from '@inertiajs/vue3';
 import { computed, nextTick, ref, watch } from 'vue';
+import { index as developersIndex } from '@/actions/App/Http/Controllers/DeveloperController';
+import { show } from '@/actions/App/Http/Controllers/PluginController';
+import { index as tagsIndex } from '@/actions/App/Http/Controllers/TagController';
+import type { Plugin } from '@/types';
+import { scoreSearchResult } from '@/utils/formatting';
 
 const page = usePage<{ plugins?: Plugin[]; apiUrl: string }>();
 const plugins = computed(() => page.props.plugins ?? []);
@@ -20,15 +21,16 @@ const links = [
     { href: '/top/absolute', label: 'Most Popular', exact: false },
     { href: '/top/relative', label: 'Fastest Growing', exact: false },
     { href: developersIndex.url(), label: 'Developers', exact: false },
+    { href: tagsIndex.url(), label: 'Tags', exact: false, detailPrefix: '/tag/' },
 ];
 
 const currentPath = computed(() => new URL(page.url, 'http://x').pathname);
 
 const isHomePage = computed(() => page.component === 'Index');
 
-function isActive(link: { href: string; exact: boolean }): boolean {
+function isActive(link: { href: string; exact: boolean; detailPrefix?: string }): boolean {
     if (link.exact) return currentPath.value === link.href;
-    return currentPath.value.startsWith(link.href);
+    return currentPath.value.startsWith(link.href) || (link.detailPrefix !== undefined && currentPath.value.startsWith(link.detailPrefix));
 }
 
 const pluginsLoaded = computed(() => Array.isArray(page.props.plugins));
@@ -121,7 +123,7 @@ async function openMenuForSearch(): Promise<void> {
                 />
                 <div class="app-header__title-group">
                     <component :is="isHomePage ? 'h1' : 'span'" class="app-header__title">RuneLite Plugin Stats</component>
-                    <span class="app-header__version">v0.5.1</span>
+                    <span class="app-header__version">v0.6.0</span>
                 </div>
             </a>
 
