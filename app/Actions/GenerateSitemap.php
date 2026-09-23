@@ -43,7 +43,7 @@ class GenerateSitemap
             );
         }
 
-        foreach (['tags.index', 'tags.top', 'tags.popular', 'tags.growing'] as $tagRoute) {
+        foreach (['tags.index', 'tags.cloud', 'tags.top', 'tags.popular', 'tags.growing'] as $tagRoute) {
             $sitemap->add(
                 Url::create(route($tagRoute))
                     ->setPriority(0.8)

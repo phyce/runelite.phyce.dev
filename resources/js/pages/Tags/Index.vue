@@ -73,11 +73,11 @@ const columns: { field: SortField; label: string; numeric: boolean }[] = [
                 <h1 class="tags-index__title">All Tags</h1>
                 <a :href="cloud.url()" class="tags-index__cloud-link">
                     <svg class="tags-index__cloud-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true">
-                        <circle cx="8" cy="8" r="6.2" />
-                        <ellipse cx="8" cy="8" rx="6.2" ry="2.6" />
-                        <ellipse cx="8" cy="8" rx="2.6" ry="6.2" />
+                        <circle cx="5.6" cy="6.2" r="3.6" />
+                        <circle cx="11.4" cy="5" r="2.3" />
+                        <circle cx="10.6" cy="11.4" r="3" />
                     </svg>
-                    3D Cloud
+                    Tag Cloud
                 </a>
             </div>
             <p class="tags-index__subtitle">Every tag used across RuneLite plugins, ranked by how many plugins use it.</p>

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\PluginTagService;
 use App\Services\RuneliteApiService;
 use Artesaos\SEOTools\Facades\JsonLd;
 use Artesaos\SEOTools\Facades\SEOMeta;
@@ -17,6 +18,8 @@ class TagController extends Controller
     private const PERIODS = ['day', 'week', 'month', 'year', 'all'];
 
     private const GROWING_PERIODS = ['day', 'week', 'month', 'year'];
+
+    private const MAP_LINKS_PER_TAG = 3;
 
     public function __construct(private RuneliteApiService $runeliteApi) {}
 
@@ -34,7 +37,7 @@ class TagController extends Controller
         ));
 
         $title = 'Tags | RuneLite Plugin Stats';
-        $description = 'All '.number_format(count($listed)).' tags used across RuneLite plugins, ranked by how many plugins use them. Browse as a ranked table or a 3D tag cloud.';
+        $description = 'All '.number_format(count($listed)).' tags used across RuneLite plugins, ranked by how many plugins use them. Browse as a ranked table or an interactive tag map.';
 
         $this->applyPageMeta($title, $description, route('tags.index'));
 
@@ -62,25 +65,19 @@ class TagController extends Controller
         ]);
     }
 
-    public function cloud(): Response
+    public function cloud(PluginTagService $pluginTags): Response
     {
-        $allTags = array_values(array_map(
-            fn (array $tag): array => [
-                'slug' => $tag['slug'],
-                'name' => $tag['name'],
-                'plugin_count' => $tag['plugin_count'] ?? 0,
-                'total_installs' => $tag['total_installs'] ?? 0,
-            ],
-            $this->runeliteApi->getTags()['tags'] ?? [],
-        ));
+        $index = $this->runeliteApi->getTags()['tags'] ?? [];
+        $map = $pluginTags->mapGraph($index, $this->runeliteApi->getPlugins(), self::MAP_LINKS_PER_TAG);
 
         $title = 'Tag Cloud | RuneLite Plugin Stats';
-        $description = 'An interactive 3D cloud of all '.number_format(count($allTags)).' RuneLite plugin tags, sized by active installs. Click a tag to explore its plugins.';
+        $description = 'An interactive map of all '.number_format(count($map['nodes'])).' RuneLite plugin tags, where related tags sit together. Zoom into any tag to explore its plugins.';
 
         $this->applyPageMeta($title, $description, route('tags.cloud'));
 
         return inertia('Tags/Cloud', [
-            'allTags' => $allTags,
+            'nodes' => $map['nodes'],
+            'links' => $map['links'],
         ]);
     }
 

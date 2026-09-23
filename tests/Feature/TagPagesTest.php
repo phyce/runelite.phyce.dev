@@ -28,7 +28,7 @@ class TagPagesTest extends TestCase
         $this->assertArrayNotHasKey('first_used', $props['tags'][0]);
     }
 
-    public function test_cloud_page_serves_every_tag_including_rare_ones(): void
+    public function test_cloud_page_maps_every_tag_by_plugin_count(): void
     {
         $this->fakeRuneliteApi();
 
@@ -36,10 +36,12 @@ class TagPagesTest extends TestCase
 
         $response->assertSuccessful();
 
-        $this->assertSame(
-            ['overlay', 'skilling', 'rare-tag'],
-            array_column($response->viewData('page')['props']['allTags'], 'slug'),
-        );
+        $props = $response->viewData('page')['props'];
+
+        $this->assertSame(['overlay', 'skilling', 'rare-tag'], array_column($props['nodes'], 0));
+        $this->assertSame(['rare-tag', 'rare tag', 1, 5], $props['nodes'][2]);
+        $this->assertSame([], $props['links']);
+        $this->assertArrayNotHasKey('searchTags', $props);
     }
 
     public function test_top_page_passes_rankings_through(): void
@@ -122,6 +124,7 @@ class TagPagesTest extends TestCase
 
         $this->get('/sitemap.xml')
             ->assertSuccessful()
+            ->assertSee(route('tags.cloud'), false)
             ->assertSee(route('tag.show', ['slug' => 'overlay']), false)
             ->assertSee(route('tag.show', ['slug' => 'rare-tag']), false);
     }

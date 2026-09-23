@@ -94,13 +94,6 @@ export interface TagRankings {
     entries: TagRankEntry[];
 }
 
-export interface TagCloudTag {
-    slug: string;
-    name: string;
-    plugin_count: number;
-    total_installs: number;
-}
-
 export interface TagPluginEntry {
     plugin: Plugin;
     other_tags: string[];
